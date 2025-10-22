@@ -5,8 +5,13 @@ import AIAnalysis from '@/components/AIAnalysis';
 import { extractKeywordsByQuestions } from '@/lib/textAnalysis';
 
 async function getManagementScores() {
+  // Vercel 서버 환경에서는 VERCEL_URL을 사용, 로컬에서는 localhost 사용
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'http://localhost:3000';
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scores/management`,
+    `${baseUrl}/api/scores/management`,
     { cache: 'no-store' }
   );
 

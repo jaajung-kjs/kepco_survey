@@ -56,6 +56,14 @@ export async function POST(request: NextRequest) {
       maxAge: 60 * 60 * 24 * 7, // 7일
     });
 
+    // is_admin 정보도 쿠키에 저장 (middleware에서 사용)
+    response.cookies.set('is_admin', user.is_admin.toString(), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7일
+    });
+
     return response;
   } catch (error) {
     console.error('Login error:', error);
