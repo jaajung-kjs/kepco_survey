@@ -1,49 +1,12 @@
 import Link from 'next/link';
 import DepartmentRadarChartSmall from '@/components/DepartmentRadarChartSmall';
-
-async function getStats() {
-  // Vercel 서버 환경에서는 VERCEL_URL을 사용, 로컬에서는 localhost 사용
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
-
-  const res = await fetch(`${baseUrl}/api/admin/stats`, {
-    cache: 'no-store',
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch stats');
-  }
-
-  return res.json();
-}
+import { getAdminStats } from '@/lib/api/stats';
+import { getAllDepartmentScores as fetchAllDepartmentScores } from '@/lib/api/scores';
 
 async function getAllDepartmentScores() {
-  // Vercel 서버 환경에서는 VERCEL_URL을 사용, 로컬에서는 localhost 사용
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
+  const data = await fetchAllDepartmentScores();
 
-  const res = await fetch(
-    `${baseUrl}/api/scores/department`,
-    { cache: 'no-store' }
-  );
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch department scores');
-  }
-
-  const data = await res.json();
-
-  interface DeptScore {
-    department: string;
-    scores?: Array<{
-      evaluationType: string;
-      finalScore: number;
-    }>;
-  }
-
-  return data.map((dept: DeptScore) => ({
+  return data.map((dept) => ({
     department: dept.department,
     byType: dept.scores?.map((score) => ({
       evaluation_type: score.evaluationType,
@@ -53,7 +16,7 @@ async function getAllDepartmentScores() {
 }
 
 export default async function AdminDashboard() {
-  const stats = await getStats();
+  const stats = await getAdminStats();
   const allScores = await getAllDepartmentScores();
 
   return (

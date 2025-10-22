@@ -3,40 +3,14 @@ import DepartmentRadarChart from '@/components/DepartmentRadarChart';
 import AIAnalysis from '@/components/AIAnalysis';
 import { getDepartmentQuestionScores, getOtherDeptQuestionScores } from '@/lib/scoreCalculator';
 import { Department } from '@/lib/constants';
+import { getAllDepartmentScores as fetchAllDepartmentScores } from '@/lib/api/scores';
 
 async function getDepartmentScores(department: string) {
-  // Vercel 서버 환경에서는 VERCEL_URL을 사용, 로컬에서는 localhost 사용
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
-
   // 전체 부서 점수를 조회하여 순위가 포함된 데이터 사용
-  const res = await fetch(
-    `${baseUrl}/api/scores/department`,
-    { cache: 'no-store' }
-  );
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch department scores');
-  }
-
-  const allData = await res.json();
-
-  type ScoreData = {
-    evaluationType: string;
-    ownScore: number;
-    otherScore?: number;
-    finalScore: number;
-    rank?: number;
-  };
-
-  interface AllDeptData {
-    department: string;
-    scores?: ScoreData[];
-  }
+  const allData = await fetchAllDepartmentScores();
 
   // 해당 부서의 데이터만 필터링
-  const data = allData.find((d: AllDeptData) => d.department === department);
+  const data = allData.find((d) => d.department === department);
 
   if (!data) {
     throw new Error('Department not found');
@@ -49,12 +23,12 @@ async function getDepartmentScores(department: string) {
   // API 응답을 페이지가 기대하는 형식으로 변환
   return {
     department: data.department,
-    byType: data.scores?.map((score: ScoreData) => ({
+    byType: data.scores?.map((score) => ({
       evaluation_type: score.evaluationType,
       own_avg: score.ownScore,
       other_avg: score.otherScore || 0,
       final_avg: score.finalScore,
-      rank: score.rank || null,
+      rank: score.rank ?? 1,
     })) || [],
     questions: questionScores,
     otherQuestions: otherQuestionScores,

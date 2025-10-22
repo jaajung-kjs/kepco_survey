@@ -3,23 +3,10 @@ import ManagementRadarChart from '@/components/ManagementRadarChart';
 import TextResponseWordCloud from '@/components/TextResponseWordCloud';
 import AIAnalysis from '@/components/AIAnalysis';
 import { extractKeywordsByQuestions } from '@/lib/textAnalysis';
+import { getManagementScores as fetchManagementScores } from '@/lib/api/scores';
 
-async function getManagementScores() {
-  // Vercel 서버 환경에서는 VERCEL_URL을 사용, 로컬에서는 localhost 사용
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : 'http://localhost:3000';
-
-  const res = await fetch(
-    `${baseUrl}/api/scores/management`,
-    { cache: 'no-store' }
-  );
-
-  if (!res.ok) {
-    throw new Error('Failed to fetch management scores');
-  }
-
-  const data = await res.json();
+async function getManagementScoresData() {
+  const data = await fetchManagementScores();
 
   interface Question {
     questionNumber: number;
@@ -61,7 +48,7 @@ async function getManagementScores() {
 }
 
 export default async function ManagementAnalysisPage() {
-  const data = await getManagementScores();
+  const data = await getManagementScoresData();
 
   // 서술형 문항 목록
   const textQuestions = [
