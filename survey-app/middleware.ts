@@ -6,6 +6,13 @@ export function middleware(request: NextRequest) {
   const isAdmin = request.cookies.get('is_admin')?.value === 'true';
   const pathname = request.nextUrl.pathname;
 
+  // 로그아웃 API는 항상 허용 (캐시 없이)
+  if (pathname === '/api/auth/logout') {
+    const response = NextResponse.next();
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+    return response;
+  }
+
   // 로그인 페이지는 인증 불필요
   if (pathname === '/login') {
     // 이미 로그인한 경우 리다이렉트
@@ -41,5 +48,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/survey/:path*', '/admin/:path*'],
+  matcher: ['/', '/login', '/survey/:path*', '/admin/:path*', '/api/auth/logout'],
 };
