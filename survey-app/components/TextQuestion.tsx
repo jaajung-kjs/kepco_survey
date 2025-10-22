@@ -5,6 +5,7 @@ interface Props {
   onChange: (value: string) => void;
   required?: boolean;
   placeholder?: string;
+  minLength?: number;
 }
 
 export default function TextQuestion({
@@ -13,8 +14,12 @@ export default function TextQuestion({
   value,
   onChange,
   required = false,
-  placeholder = '의견을 자유롭게 작성해주세요',
+  placeholder = '의견을 자유롭게 작성해주세요 (최소 10자 이상)',
+  minLength = 10,
 }: Props) {
+  const charCount = value.length;
+  const isValid = !required || charCount >= minLength;
+
   return (
     <div className="border-b border-gray-200 pb-3 mb-3">
       <div className="mb-2">
@@ -29,8 +34,20 @@ export default function TextQuestion({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={3}
-        className="w-full px-3 py-2 text-sm border-2 border-gray-300 rounded focus:border-blue-600 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all"
+        className={`w-full px-3 py-2 text-sm border-2 rounded focus:ring-2 focus:ring-blue-200 focus:outline-none transition-all ${
+          required && charCount > 0 && !isValid
+            ? 'border-red-500 focus:border-red-600'
+            : 'border-gray-300 focus:border-blue-600'
+        }`}
       />
+
+      {required && (
+        <div className="mt-1 text-xs">
+          <span className={charCount >= minLength ? 'text-green-600' : 'text-gray-500'}>
+            {charCount}자 / 최소 {minLength}자
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -14,17 +14,29 @@ interface Props {
 
 export default function OpinionSurvey({ questions, onNext, onBack, submitting = false, submitError = '' }: Props) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [error, setError] = useState('');
 
   const handleChange = (questionNumber: number, value: string) => {
     setAnswers((prev) => ({
       ...prev,
       [questionNumber]: value,
     }));
+    setError('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // 서술형 문항은 모두 선택사항이므로 유효성 검증 없이 제출
+    setError('');
+
+    // 각 텍스트 필드가 입력되었다면 10자 이상이어야 함
+    for (const question of questions) {
+      const answer = answers[question.question_number] || '';
+      if (answer.length > 0 && answer.length < 10) {
+        setError(`Q${question.question_number}번 문항은 최소 10자 이상 작성해주세요. (현재 ${answer.length}자)`);
+        return;
+      }
+    }
+
     onNext(answers);
   };
 
@@ -49,9 +61,9 @@ export default function OpinionSurvey({ questions, onNext, onBack, submitting = 
           />
         ))}
 
-        {submitError && (
+        {(error || submitError) && (
           <div className="rounded-md bg-red-50 p-4 mb-6">
-            <p className="text-sm font-medium text-red-800">{submitError}</p>
+            <p className="text-sm font-medium text-red-800">{error || submitError}</p>
           </div>
         )}
 

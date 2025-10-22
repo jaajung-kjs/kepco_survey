@@ -52,6 +52,26 @@ export default function ManagementSurvey({ questions, onNext, onBack }: Props) {
       return;
     }
 
+    // Q40 검증 (Q39가 2점 이하일 때만 필수)
+    if (showQ40) {
+      const q40Answer = textAnswers[40] || '';
+      if (q40Answer.length < 10) {
+        setError('Q40. 관리처 전반에서 업무협조가 어려운 이유를 10자 이상 작성해주세요.');
+        const q40Element = document.getElementById('question-40');
+        q40Element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+    }
+
+    // Q45 검증 (항상 필수)
+    const q45Answer = textAnswers[45] || '';
+    if (q45Answer.length < 10) {
+      setError('Q45. 타 부서와의 업무협조 개선 방안을 10자 이상 작성해주세요.');
+      const q45Element = document.getElementById('question-45');
+      q45Element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
     onNext(scaleAnswers, textAnswers);
   };
 
@@ -119,7 +139,7 @@ export default function ManagementSurvey({ questions, onNext, onBack }: Props) {
                       questionText={question.question_text}
                       value={textAnswers[question.question_number] || ''}
                       onChange={(value) => handleTextChange(question.question_number, value)}
-                      required={false}
+                      required={question.question_number === 40 || question.question_number === 45}
                     />
                   )}
                 </div>
