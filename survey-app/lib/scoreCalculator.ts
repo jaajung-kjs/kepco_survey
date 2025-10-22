@@ -181,7 +181,7 @@ export async function calculateAllDepartmentScores(): Promise<DepartmentScore[]>
     departmentScores.push(score);
   }
 
-  // 2. 평가유형별 순위 계산
+  // 2. 평가유형별 순위 계산 (동점 처리)
   for (const evalType of Object.keys(EVALUATION_TYPES)) {
     const evaluationType = EVALUATION_TYPES[evalType as keyof typeof EVALUATION_TYPES];
 
@@ -193,23 +193,39 @@ export async function calculateAllDepartmentScores(): Promise<DepartmentScore[]>
       }))
       .sort((a, b) => b.score - a.score);
 
-    // 순위 부여
-    sortedScores.forEach((item, rank) => {
+    // 순위 부여 (동점 처리)
+    let currentRank = 1;
+    for (let i = 0; i < sortedScores.length; i++) {
+      const item = sortedScores[i];
+
+      // 이전 점수와 비교하여 동점이면 같은 순위, 아니면 현재 인덱스 + 1
+      if (i > 0 && Math.abs(sortedScores[i - 1].score - item.score) > 0.01) {
+        currentRank = i + 1;
+      }
+
       const scoreIndex = departmentScores[item.deptIndex].scores.findIndex(
         s => s.evaluationType === evaluationType
       );
-      departmentScores[item.deptIndex].scores[scoreIndex].rank = rank + 1;
-    });
+      departmentScores[item.deptIndex].scores[scoreIndex].rank = currentRank;
+    }
   }
 
-  // 3. 전체 평균 순위 계산
+  // 3. 전체 평균 순위 계산 (동점 처리)
   const sortedByOverall = departmentScores
     .map((dept, index) => ({ deptIndex: index, average: dept.overallAverage }))
     .sort((a, b) => b.average - a.average);
 
-  sortedByOverall.forEach((item, rank) => {
-    departmentScores[item.deptIndex].overallRank = rank + 1;
-  });
+  let currentRank = 1;
+  for (let i = 0; i < sortedByOverall.length; i++) {
+    const item = sortedByOverall[i];
+
+    // 이전 점수와 비교하여 동점이면 같은 순위, 아니면 현재 인덱스 + 1
+    if (i > 0 && Math.abs(sortedByOverall[i - 1].average - item.average) > 0.01) {
+      currentRank = i + 1;
+    }
+
+    departmentScores[item.deptIndex].overallRank = currentRank;
+  }
 
   return departmentScores;
 }
@@ -316,28 +332,59 @@ export async function getDepartmentQuestionScores(department: Department): Promi
     .from('department_scores')
     .select('*');
 
-  // Q2-Q20 각 문항별 점수
+  // Q2-Q20 각 문항별 점수 및 순위 계산
   for (let qNum = 2; qNum <= 20; qNum++) {
     const sum = deptData[`q${qNum}_sum`] || 0;
     const count = deptData[`q${qNum}_count`] || 0;
     const average = count > 0 ? sum / count : 0;
 
-    // 전체 부서 평균
+    // 전체 부서 평균 및 순위 계산
     let overallSum = 0;
     let overallCount = 0;
+    const deptAverages: { dept: string; avg: number }[] = [];
+
     if (allDeptData) {
       for (const dept of allDeptData) {
-        overallSum += dept[`q${qNum}_sum`] || 0;
-        overallCount += dept[`q${qNum}_count`] || 0;
+        const deptSum = dept[`q${qNum}_sum`] || 0;
+        const deptCount = dept[`q${qNum}_count`] || 0;
+        const deptAvg = deptCount > 0 ? deptSum / deptCount : 0;
+
+        overallSum += deptSum;
+        overallCount += deptCount;
+
+        deptAverages.push({
+          dept: dept.department,
+          avg: deptAvg
+        });
       }
     }
+
     const overallAverage = overallCount > 0 ? overallSum / overallCount : 0;
+
+    // 순위 계산 (높은 점수가 1위, 동점 처리)
+    const sortedDepts = deptAverages
+      .filter(d => d.avg > 0)
+      .sort((a, b) => b.avg - a.avg);
+
+    let rank = null;
+    let currentRank = 1;
+    for (let i = 0; i < sortedDepts.length; i++) {
+      // 이전 점수와 비교하여 동점이면 같은 순위, 아니면 현재 인덱스 + 1
+      if (i > 0 && Math.abs(sortedDepts[i - 1].avg - sortedDepts[i].avg) > 0.01) {
+        currentRank = i + 1;
+      }
+
+      if (sortedDepts[i].dept === department) {
+        rank = currentRank;
+        break;
+      }
+    }
 
     questionScores.push({
       questionNumber: qNum,
       questionText: questionTexts.get(qNum) || `Q${qNum}`,
       average: Math.round(average * 10) / 10,
-      rank: null,  // 순위 계산 필요시 추가
+      rank: rank > 0 ? rank : null,
       overallAverage: Math.round(overallAverage * 10) / 10,
     });
   }
@@ -383,22 +430,53 @@ export async function getOtherDeptQuestionScores(department: Department): Promis
     const count = deptData[`other_q${qNum}_count`] || 0;
     const average = count > 0 ? sum / count : 0;
 
-    // 전체 부서 평균
+    // 전체 부서 평균 및 순위 계산
     let overallSum = 0;
     let overallCount = 0;
+    const deptAverages: { dept: string; avg: number }[] = [];
+
     if (allDeptData) {
       for (const dept of allDeptData) {
-        overallSum += dept[`other_q${qNum}_sum`] || 0;
-        overallCount += dept[`other_q${qNum}_count`] || 0;
+        const deptSum = dept[`other_q${qNum}_sum`] || 0;
+        const deptCount = dept[`other_q${qNum}_count`] || 0;
+        const deptAvg = deptCount > 0 ? deptSum / deptCount : 0;
+
+        overallSum += deptSum;
+        overallCount += deptCount;
+
+        deptAverages.push({
+          dept: dept.department,
+          avg: deptAvg
+        });
       }
     }
+
     const overallAverage = overallCount > 0 ? overallSum / overallCount : 0;
+
+    // 순위 계산 (높은 점수가 1위, 동점 처리)
+    const sortedDepts = deptAverages
+      .filter(d => d.avg > 0)
+      .sort((a, b) => b.avg - a.avg);
+
+    let rank = null;
+    let currentRank = 1;
+    for (let i = 0; i < sortedDepts.length; i++) {
+      // 이전 점수와 비교하여 동점이면 같은 순위, 아니면 현재 인덱스 + 1
+      if (i > 0 && Math.abs(sortedDepts[i - 1].avg - sortedDepts[i].avg) > 0.01) {
+        currentRank = i + 1;
+      }
+
+      if (sortedDepts[i].dept === department) {
+        rank = currentRank;
+        break;
+      }
+    }
 
     questionScores.push({
       questionNumber: qNum,
       questionText: otherQuestionTexts.get(qNum) || `타부서 평가 Q${qNum}`,
       average: Math.round(average * 10) / 10,
-      rank: null,
+      rank: rank > 0 ? rank : null,
       overallAverage: Math.round(overallAverage * 10) / 10,
     });
   }

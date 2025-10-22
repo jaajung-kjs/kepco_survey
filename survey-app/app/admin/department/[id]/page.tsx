@@ -5,8 +5,9 @@ import { getDepartmentQuestionScores, getOtherDeptQuestionScores } from '@/lib/s
 import { Department } from '@/lib/constants';
 
 async function getDepartmentScores(department: string) {
+  // 전체 부서 점수를 조회하여 순위가 포함된 데이터 사용
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scores/department?department=${encodeURIComponent(department)}`,
+    `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scores/department`,
     { cache: 'no-store' }
   );
 
@@ -14,7 +15,14 @@ async function getDepartmentScores(department: string) {
     throw new Error('Failed to fetch department scores');
   }
 
-  const data = await res.json();
+  const allData = await res.json();
+
+  // 해당 부서의 데이터만 필터링
+  const data = allData.find((d: any) => d.department === department);
+
+  if (!data) {
+    throw new Error('Department not found');
+  }
 
   // 세부 문항별 점수 조회
   const questionScores = await getDepartmentQuestionScores(department as Department);
@@ -28,7 +36,7 @@ async function getDepartmentScores(department: string) {
       own_avg: score.ownScore,
       other_avg: score.otherScore || 0,
       final_avg: score.finalScore,
-      rank: score.rank || 1,
+      rank: score.rank || null,
     })) || [],
     questions: questionScores,
     otherQuestions: otherQuestionScores,
@@ -133,12 +141,11 @@ export default async function DepartmentAnalysisPage({
                   <th className="text-left py-3 px-4">문항</th>
                   <th className="text-center py-3 px-4">평균 점수</th>
                   <th className="text-center py-3 px-4">전체 평균</th>
-                  <th className="text-center py-3 px-4">차이</th>
+                  <th className="text-center py-3 px-4">순위</th>
                 </tr>
               </thead>
               <tbody>
                 {data.questions.map((q: any) => {
-                  const diff = q.average - q.overallAverage;
                   return (
                     <tr key={q.questionNumber} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm">
@@ -151,13 +158,13 @@ export default async function DepartmentAnalysisPage({
                         {q.overallAverage.toFixed(2)}점
                       </td>
                       <td className="text-center py-3 px-4">
-                        <span className={`font-medium ${
-                          diff > 0 ? 'text-green-600' :
-                          diff < 0 ? 'text-red-600' :
-                          'text-gray-600'
-                        }`}>
-                          {diff > 0 ? '+' : ''}{diff.toFixed(2)}
-                        </span>
+                        {q.rank ? (
+                          <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {q.rank}위
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -177,12 +184,11 @@ export default async function DepartmentAnalysisPage({
                   <th className="text-left py-3 px-4">문항</th>
                   <th className="text-center py-3 px-4">평균 점수</th>
                   <th className="text-center py-3 px-4">전체 평균</th>
-                  <th className="text-center py-3 px-4">차이</th>
+                  <th className="text-center py-3 px-4">순위</th>
                 </tr>
               </thead>
               <tbody>
                 {data.otherQuestions.map((q: any) => {
-                  const diff = q.average - q.overallAverage;
                   return (
                     <tr key={q.questionNumber} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm">
@@ -195,13 +201,13 @@ export default async function DepartmentAnalysisPage({
                         {q.overallAverage.toFixed(2)}점
                       </td>
                       <td className="text-center py-3 px-4">
-                        <span className={`font-medium ${
-                          diff > 0 ? 'text-green-600' :
-                          diff < 0 ? 'text-red-600' :
-                          'text-gray-600'
-                        }`}>
-                          {diff > 0 ? '+' : ''}{diff.toFixed(2)}
-                        </span>
+                        {q.rank ? (
+                          <span className="inline-block px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            {q.rank}위
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
                       </td>
                     </tr>
                   );

@@ -72,7 +72,7 @@ export default function TextResponseWordCloud({
       </div>
 
       {/* 워드클라우드 */}
-      <div className="bg-white rounded-lg border border-gray-200 p-8 mb-6" style={{ minHeight: '400px' }}>
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
         <TagCloud
           minSize={14}
           maxSize={48}
@@ -83,18 +83,6 @@ export default function TextResponseWordCloud({
             hue: 'blue',
           }}
         />
-      </div>
-
-      {/* 전체 응답 텍스트 */}
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">전체 응답</h4>
-        <div className="space-y-3">
-          {filteredResponses.map((response, idx) => (
-            <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <p className="text-gray-700 text-sm">{response.response_text}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

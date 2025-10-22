@@ -68,27 +68,8 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* 부서별 레이더 차트 */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6">부서별 평가 현황</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {allScores.map((dept: any) => (
-              <Link
-                key={dept.department}
-                href={`/admin/department/${encodeURIComponent(dept.department)}`}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer"
-              >
-                <DepartmentRadarChartSmall
-                  data={dept.byType}
-                  department={dept.department}
-                />
-              </Link>
-            ))}
-          </div>
-        </div>
-
         {/* 메뉴 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link
             href="/admin/management"
             className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
@@ -112,6 +93,25 @@ export default async function AdminDashboard() {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">로그아웃</h3>
             <p className="text-gray-600 text-sm">관리자 세션 종료</p>
           </Link>
+        </div>
+
+        {/* 부서별 레이더 차트 */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-6">부서별 평가 현황</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {allScores.map((dept: any) => (
+              <Link
+                key={dept.department}
+                href={`/admin/department/${encodeURIComponent(dept.department)}`}
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer"
+              >
+                <DepartmentRadarChartSmall
+                  data={dept.byType}
+                  department={dept.department}
+                />
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>
