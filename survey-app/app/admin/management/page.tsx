@@ -78,7 +78,6 @@ export default async function ManagementAnalysisPage() {
                 <tr className="border-b">
                   <th className="text-left py-3 px-4">평가유형</th>
                   <th className="text-center py-3 px-4">평균 점수</th>
-                  <th className="text-center py-3 px-4">응답 수</th>
                 </tr>
               </thead>
               <tbody>
@@ -89,9 +88,6 @@ export default async function ManagementAnalysisPage() {
                       <span className="font-semibold text-purple-600">
                         {type.avg_score.toFixed(2)}점
                       </span>
-                    </td>
-                    <td className="text-center py-3 px-4 text-gray-600">
-                      {type.response_count}명
                     </td>
                   </tr>
                 ))}
@@ -122,18 +118,16 @@ export default async function ManagementAnalysisPage() {
                         <tr className="border-b bg-gray-50">
                           <th className="text-left py-2 px-4 text-sm">문항</th>
                           <th className="text-center py-2 px-4 text-sm">평균 점수</th>
-                          <th className="text-center py-2 px-4 text-sm">응답 수</th>
                         </tr>
                       </thead>
                       <tbody>
                         {questions.map((q: any) => (
                           <tr key={q.question_number} className="border-b hover:bg-gray-50">
-                            <td className="py-2 px-4 text-sm">{q.question_text}</td>
-                            <td className="text-center py-2 px-4 text-sm font-medium">
-                              {q.avg_score.toFixed(2)}점
+                            <td className="py-2 px-4 text-sm">
+                              <span className="font-medium text-gray-700">Q{q.question_number}.</span> {q.question_text}
                             </td>
-                            <td className="text-center py-2 px-4 text-sm text-gray-600">
-                              {q.response_count}명
+                            <td className="text-center py-2 px-4 text-sm font-medium text-purple-600">
+                              {q.avg_score.toFixed(2)}점
                             </td>
                           </tr>
                         ))}

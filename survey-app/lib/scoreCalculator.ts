@@ -220,7 +220,7 @@ export async function calculateAllDepartmentScores(): Promise<DepartmentScore[]>
  */
 export async function calculateManagementScores(): Promise<ManagementScore[]> {
   // 1. 관리처 데이터 조회
-  const { data: mgmtData, error: mgmtError } = await supabase
+  const { data: mgmtData, error: mgmtError} = await supabase
     .from('management_scores')
     .select('*')
     .single();
@@ -228,6 +228,18 @@ export async function calculateManagementScores(): Promise<ManagementScore[]> {
   if (mgmtError || !mgmtData) {
     throw new Error(`관리처 데이터 조회 실패: ${mgmtError?.message}`);
   }
+
+  // 문항 텍스트 조회
+  const { data: questions } = await supabase
+    .from('survey_questions')
+    .select('question_number, question_text')
+    .gte('question_number', 26)
+    .lte('question_number', 49)
+    .order('question_number');
+
+  const questionTexts = new Map(
+    questions?.map(q => [q.question_number, q.question_text]) || []
+  );
 
   // 2. 평가유형별 점수 계산
   const managementScores: ManagementScore[] = [];
@@ -246,14 +258,14 @@ export async function calculateManagementScores(): Promise<ManagementScore[]> {
       totalSum += sum;
       totalCount += count;
 
-      // 문항별 점수 저장 (문항 텍스트는 별도로 조회 필요)
+      // 문항별 점수 저장
       const average = count > 0 ? sum / count : 0;
       questionScores.push({
         questionNumber: qNum,
-        questionText: '',  // API에서 조회하여 채움
+        questionText: questionTexts.get(qNum) || `Q${qNum}`,
         average: Math.round(average * 10) / 10,
         rank: null,  // 필요시 추가 구현
-        overallAverage: 0,  // 전체 평균은 별도 계산 필요
+        overallAverage: 0,  // 관리처는 전체 평균 불필요
       });
     }
 
@@ -285,6 +297,18 @@ export async function getDepartmentQuestionScores(department: Department): Promi
     throw new Error(`부서 데이터 조회 실패: ${error?.message}`);
   }
 
+  // 문항 텍스트 조회
+  const { data: questions } = await supabase
+    .from('survey_questions')
+    .select('question_number, question_text')
+    .gte('question_number', 2)
+    .lte('question_number', 20)
+    .order('question_number');
+
+  const questionTexts = new Map(
+    questions?.map(q => [q.question_number, q.question_text]) || []
+  );
+
   const questionScores: QuestionScore[] = [];
 
   // 전체 부서 평균 계산을 위한 모든 부서 데이터 조회
@@ -311,9 +335,70 @@ export async function getDepartmentQuestionScores(department: Department): Promi
 
     questionScores.push({
       questionNumber: qNum,
-      questionText: '',  // API에서 조회하여 채움
+      questionText: questionTexts.get(qNum) || `Q${qNum}`,
       average: Math.round(average * 10) / 10,
       rank: null,  // 순위 계산 필요시 추가
+      overallAverage: Math.round(overallAverage * 10) / 10,
+    });
+  }
+
+  return questionScores;
+}
+
+/**
+ * 특정 부서의 타부서 평가 세부 문항 점수 조회
+ * @param department 부서명
+ * @returns 타부서 평가 문항별 점수 배열
+ */
+export async function getOtherDeptQuestionScores(department: Department): Promise<QuestionScore[]> {
+  const { data: deptData, error } = await supabase
+    .from('department_scores')
+    .select('*')
+    .eq('department', department)
+    .single();
+
+  if (error || !deptData) {
+    throw new Error(`부서 데이터 조회 실패: ${error?.message}`);
+  }
+
+  // 타부서 평가 문항 텍스트 (하드코딩)
+  const otherQuestionTexts = new Map([
+    [1, '조직 및 구성원의 업무수행 역량이 우수하다'],
+    [2, '올 한 해 우수한 업무 성과를 달성하고 있다'],
+    [3, '조직 간 갈등해결에 유연하고 적극적이다'],
+    [4, '조직 간 협업에 적극적이다'],
+    [5, '구성원 직무능력 개발, 업무개선 등 혁신업무 실적이 우수하다'],
+  ]);
+
+  const questionScores: QuestionScore[] = [];
+
+  // 전체 부서 평균 계산
+  const { data: allDeptData } = await supabase
+    .from('department_scores')
+    .select('*');
+
+  // other_q1 ~ other_q5
+  for (let qNum = 1; qNum <= 5; qNum++) {
+    const sum = deptData[`other_q${qNum}_sum`] || 0;
+    const count = deptData[`other_q${qNum}_count`] || 0;
+    const average = count > 0 ? sum / count : 0;
+
+    // 전체 부서 평균
+    let overallSum = 0;
+    let overallCount = 0;
+    if (allDeptData) {
+      for (const dept of allDeptData) {
+        overallSum += dept[`other_q${qNum}_sum`] || 0;
+        overallCount += dept[`other_q${qNum}_count`] || 0;
+      }
+    }
+    const overallAverage = overallCount > 0 ? overallSum / overallCount : 0;
+
+    questionScores.push({
+      questionNumber: qNum,
+      questionText: otherQuestionTexts.get(qNum) || `타부서 평가 Q${qNum}`,
+      average: Math.round(average * 10) / 10,
+      rank: null,
       overallAverage: Math.round(overallAverage * 10) / 10,
     });
   }
@@ -326,25 +411,21 @@ export async function getDepartmentQuestionScores(department: Department): Promi
  * @param questionNumbers 문항 번호 배열
  * @returns 서술형 응답 배열
  */
-export async function getTextResponses(questionNumbers: number[]): Promise<Array<{ questionNumber: number; responses: string[] }>> {
-  const results = [];
+export async function getTextResponses(questionNumbers: number[]): Promise<Array<{ question_number: number; question_text: string; response_text: string }>> {
+  const { data, error } = await supabase
+    .from('text_responses')
+    .select('question_number, response_text')
+    .in('question_number', questionNumbers);
 
-  for (const qNum of questionNumbers) {
-    const { data, error } = await supabase
-      .from('text_responses')
-      .select('response_text')
-      .eq('question_number', qNum);
-
-    if (error) {
-      console.error(`문항 ${qNum} 조회 실패:`, error);
-      continue;
-    }
-
-    results.push({
-      questionNumber: qNum,
-      responses: data?.map(r => r.response_text) || [],
-    });
+  if (error) {
+    console.error('서술형 응답 조회 실패:', error);
+    return [];
   }
 
-  return results;
+  // question_text는 컴포넌트에서 사용하지 않지만 인터페이스에 맞추기 위해 빈 문자열 추가
+  return data?.map(r => ({
+    question_number: r.question_number,
+    question_text: '',
+    response_text: r.response_text,
+  })) || [];
 }

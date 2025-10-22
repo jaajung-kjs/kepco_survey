@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { DEPARTMENTS } from '@/lib/constants';
+import DepartmentRadarChartSmall from '@/components/DepartmentRadarChartSmall';
 
 async function getStats() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/admin/stats`, {
@@ -13,8 +14,30 @@ async function getStats() {
   return res.json();
 }
 
+async function getAllDepartmentScores() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/scores/department`,
+    { cache: 'no-store' }
+  );
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch department scores');
+  }
+
+  const data = await res.json();
+
+  return data.map((dept: any) => ({
+    department: dept.department,
+    byType: dept.scores?.map((score: any) => ({
+      evaluation_type: score.evaluationType,
+      final_avg: score.finalScore,
+    })) || [],
+  }));
+}
+
 export default async function AdminDashboard() {
   const stats = await getStats();
+  const allScores = await getAllDepartmentScores();
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -45,54 +68,22 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        {/* 부서별 응답 현황 */}
+        {/* 부서별 레이더 차트 */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">부서별 응답 현황</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4">부서명</th>
-                  <th className="text-center py-3 px-4">전체</th>
-                  <th className="text-center py-3 px-4">완료</th>
-                  <th className="text-center py-3 px-4">응답률</th>
-                  <th className="text-center py-3 px-4">분석 보기</th>
-                </tr>
-              </thead>
-              <tbody>
-                {DEPARTMENTS.map((dept) => {
-                  const deptStats = stats.byDepartment.find((d: any) => d.department === dept);
-                  const total = deptStats?.total || 0;
-                  const completed = deptStats?.completed || 0;
-                  const rate = deptStats?.rate || 0;
-
-                  return (
-                    <tr key={dept} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 font-medium">{dept}</td>
-                      <td className="text-center py-3 px-4">{total}명</td>
-                      <td className="text-center py-3 px-4">{completed}명</td>
-                      <td className="text-center py-3 px-4">
-                        <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                          rate === 100 ? 'bg-green-100 text-green-800' :
-                          rate >= 50 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {rate.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <Link
-                          href={`/admin/department/${encodeURIComponent(dept)}`}
-                          className="text-blue-600 hover:text-blue-800 font-medium"
-                        >
-                          상세 분석 →
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <h2 className="text-xl font-semibold mb-6">부서별 평가 현황</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {allScores.map((dept: any) => (
+              <Link
+                key={dept.department}
+                href={`/admin/department/${encodeURIComponent(dept.department)}`}
+                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer"
+              >
+                <DepartmentRadarChartSmall
+                  data={dept.byType}
+                  department={dept.department}
+                />
+              </Link>
+            ))}
           </div>
         </div>
 

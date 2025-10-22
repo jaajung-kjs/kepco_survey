@@ -1,7 +1,5 @@
 'use client';
 
-import ReactWordcloud from 'react-wordcloud';
-
 interface TextResponseWordCloudProps {
   responses: {
     question_number: number;
@@ -49,18 +47,13 @@ export default function TextResponseWordCloud({
     });
   });
 
-  // 워드클라우드 데이터 생성
-  const wordCloudData = Object.entries(words).map(([text, value]) => ({
-    text,
-    value,
-  }));
+  // 키워드 데이터 생성
+  const wordData = Object.entries(words)
+    .map(([text, count]) => ({ text, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 20);
 
-  // 상위 50개만 표시
-  const topWords = wordCloudData
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 50);
-
-  if (topWords.length === 0) {
+  if (wordData.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         키워드를 추출할 수 없습니다.
@@ -68,17 +61,45 @@ export default function TextResponseWordCloud({
     );
   }
 
+  const totalResponses = filteredResponses.length;
+  const maxCount = Math.max(...wordData.map(w => w.count));
+
   return (
-    <div className="h-96">
-      <ReactWordcloud
-        words={topWords}
-        options={{
-          rotations: 2,
-          rotationAngles: [0, 90],
-          fontSizes: [12, 60],
-          padding: 2,
-        }}
-      />
+    <div className="py-6">
+      <div className="mb-4 text-sm text-gray-600">
+        총 {totalResponses}개의 응답 • 상위 {wordData.length}개 키워드
+      </div>
+
+      {/* 키워드 빈도 차트 */}
+      <div className="space-y-2 mb-6">
+        {wordData.map((word, idx) => (
+          <div key={idx} className="flex items-center gap-3">
+            <div className="w-24 text-sm font-medium text-gray-700 text-right">
+              {word.text}
+            </div>
+            <div className="flex-1 bg-gray-100 rounded-full h-6 relative">
+              <div
+                className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
+                style={{ width: `${(word.count / maxCount) * 100}%` }}
+              >
+                <span className="text-xs text-white font-medium">{word.count}회</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 전체 응답 텍스트 */}
+      <div className="mt-6 pt-6 border-t border-gray-200">
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">전체 응답</h4>
+        <div className="space-y-3">
+          {filteredResponses.map((response, idx) => (
+            <div key={idx} className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <p className="text-gray-700 text-sm">{response.response_text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

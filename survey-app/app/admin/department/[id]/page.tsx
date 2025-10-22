@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import DepartmentRadarChart from '@/components/DepartmentRadarChart';
 import AIAnalysis from '@/components/AIAnalysis';
+import { getDepartmentQuestionScores, getOtherDeptQuestionScores } from '@/lib/scoreCalculator';
+import { Department } from '@/lib/constants';
 
 async function getDepartmentScores(department: string) {
   const res = await fetch(
@@ -14,6 +16,10 @@ async function getDepartmentScores(department: string) {
 
   const data = await res.json();
 
+  // 세부 문항별 점수 조회
+  const questionScores = await getDepartmentQuestionScores(department as Department);
+  const otherQuestionScores = await getOtherDeptQuestionScores(department as Department);
+
   // API 응답을 페이지가 기대하는 형식으로 변환
   return {
     department: data.department,
@@ -24,7 +30,8 @@ async function getDepartmentScores(department: string) {
       final_avg: score.finalScore,
       rank: score.rank || 1,
     })) || [],
-    questions: [], // 세부 문항은 추후 구현
+    questions: questionScores,
+    otherQuestions: otherQuestionScores,
   };
 }
 
@@ -117,14 +124,92 @@ export default async function DepartmentAnalysisPage({
         </div>
 
         {/* 세부 문항별 점수 */}
-        {data.questions && data.questions.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">세부 문항별 점수</h2>
-            <div className="text-center py-4 text-gray-600">
-              세부 문항 분석은 향후 업데이트 예정입니다.
-            </div>
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">세부 문항별 점수 (Q2-Q20)</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="text-left py-3 px-4">문항</th>
+                  <th className="text-center py-3 px-4">평균 점수</th>
+                  <th className="text-center py-3 px-4">전체 평균</th>
+                  <th className="text-center py-3 px-4">차이</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.questions.map((q: any) => {
+                  const diff = q.average - q.overallAverage;
+                  return (
+                    <tr key={q.questionNumber} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm">
+                        <span className="font-medium text-gray-700">Q{q.questionNumber}.</span> {q.questionText}
+                      </td>
+                      <td className="text-center py-3 px-4">
+                        <span className="font-semibold text-blue-600">{q.average.toFixed(2)}점</span>
+                      </td>
+                      <td className="text-center py-3 px-4 text-gray-600">
+                        {q.overallAverage.toFixed(2)}점
+                      </td>
+                      <td className="text-center py-3 px-4">
+                        <span className={`font-medium ${
+                          diff > 0 ? 'text-green-600' :
+                          diff < 0 ? 'text-red-600' :
+                          'text-gray-600'
+                        }`}>
+                          {diff > 0 ? '+' : ''}{diff.toFixed(2)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
+
+        {/* 타부서 평가 세부 문항별 점수 */}
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4">타부서 평가 세부 문항별 점수</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="text-left py-3 px-4">문항</th>
+                  <th className="text-center py-3 px-4">평균 점수</th>
+                  <th className="text-center py-3 px-4">전체 평균</th>
+                  <th className="text-center py-3 px-4">차이</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.otherQuestions.map((q: any) => {
+                  const diff = q.average - q.overallAverage;
+                  return (
+                    <tr key={q.questionNumber} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm">
+                        {q.questionText}
+                      </td>
+                      <td className="text-center py-3 px-4">
+                        <span className="font-semibold text-blue-600">{q.average.toFixed(2)}점</span>
+                      </td>
+                      <td className="text-center py-3 px-4 text-gray-600">
+                        {q.overallAverage.toFixed(2)}점
+                      </td>
+                      <td className="text-center py-3 px-4">
+                        <span className={`font-medium ${
+                          diff > 0 ? 'text-green-600' :
+                          diff < 0 ? 'text-red-600' :
+                          'text-gray-600'
+                        }`}>
+                          {diff > 0 ? '+' : ''}{diff.toFixed(2)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         {/* AI 분석 */}
         <AIAnalysis data={data} type="department" />
