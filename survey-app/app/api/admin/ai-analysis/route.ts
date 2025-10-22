@@ -82,22 +82,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Upsert (insert or update if exists)
-    const { data, error } = await supabase
+    // Check if analysis exists
+    let query = supabase
       .from('ai_analyses')
-      .upsert(
-        {
+      .select('id')
+      .eq('analysis_type', analysisType);
+
+    if (targetKey) {
+      query = query.eq('target_key', targetKey);
+    } else {
+      query = query.is('target_key', null);
+    }
+
+    const { data: existing } = await query.single();
+
+    let data, error;
+
+    if (existing) {
+      // Update existing
+      const result = await supabase
+        .from('ai_analyses')
+        .update({
+          analysis_content: content,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existing.id)
+        .select()
+        .single();
+
+      data = result.data;
+      error = result.error;
+    } else {
+      // Insert new
+      const result = await supabase
+        .from('ai_analyses')
+        .insert({
           analysis_type: analysisType,
           target_key: targetKey || null,
           analysis_content: content,
           updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: 'analysis_type,target_key',
-        }
-      )
-      .select()
-      .single();
+        })
+        .select()
+        .single();
+
+      data = result.data;
+      error = result.error;
+    }
 
     if (error) {
       console.error('Error saving AI analysis:', error);
