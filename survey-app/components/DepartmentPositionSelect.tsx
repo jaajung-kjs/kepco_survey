@@ -30,11 +30,28 @@ export default function DepartmentPositionSelect({ onSubmit }: Props) {
     onSubmit(department as Department, position as Position);
   };
 
+  const handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) {
+      return;
+    }
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">
-        소속 및 직급 선택
-      </h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-bold text-gray-900">
+          소속 및 직급 선택
+        </h2>
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="text-sm text-gray-600 hover:text-gray-900"
+        >
+          로그아웃
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 부서 선택 */}

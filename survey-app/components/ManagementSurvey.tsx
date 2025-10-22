@@ -9,11 +9,13 @@ interface Props {
   questions: SurveyQuestion[];
   onNext: (scaleAnswers: Record<number, number>, textAnswers: Record<number, string>) => void;
   onBack: () => void;
+  initialScaleAnswers?: Record<number, number>;
+  initialTextAnswers?: Record<number, string>;
 }
 
-export default function ManagementSurvey({ questions, onNext, onBack }: Props) {
-  const [scaleAnswers, setScaleAnswers] = useState<Record<number, number>>({});
-  const [textAnswers, setTextAnswers] = useState<Record<number, string>>({});
+export default function ManagementSurvey({ questions, onNext, onBack, initialScaleAnswers = {}, initialTextAnswers = {} }: Props) {
+  const [scaleAnswers, setScaleAnswers] = useState<Record<number, number>>(initialScaleAnswers);
+  const [textAnswers, setTextAnswers] = useState<Record<number, string>>(initialTextAnswers);
   const [error, setError] = useState('');
 
   const handleScaleChange = (questionNumber: number, value: number) => {
@@ -95,14 +97,31 @@ export default function ManagementSurvey({ questions, onNext, onBack }: Props) {
   const q39Answer = scaleAnswers[39];
   const showQ40 = q39Answer !== undefined && q39Answer <= 2; // 1점 또는 2점인 경우에만 Q40 표시
 
+  const handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까? 작성 중인 내용은 저장되지 않습니다.')) {
+      return;
+    }
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-bold text-gray-900">관리처 전반 평가</h2>
-          <span className="text-sm text-gray-600">
-            진행률: {getProgress()}% ({Object.keys(scaleAnswers).length}/{questions.filter(q => q.response_type === '5점척도').length})
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600">
+              진행률: {getProgress()}% ({Object.keys(scaleAnswers).length}/{questions.filter(q => q.response_type === '5점척도').length})
+            </span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              로그아웃
+            </button>
+          </div>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div

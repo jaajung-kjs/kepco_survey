@@ -19,6 +19,7 @@ export default function SurveyForm() {
   const [otherDeptAnswers, setOtherDeptAnswers] = useState<Record<string, Record<string, number>>>({});
   const [managementScaleAnswers, setManagementScaleAnswers] = useState<Record<number, number>>({});
   const [managementTextAnswers, setManagementTextAnswers] = useState<Record<number, string>>({});
+  const [opinionAnswers, setOpinionAnswers] = useState<Record<number, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
@@ -119,7 +120,8 @@ export default function SurveyForm() {
     setCurrentStep('opinion');
   };
 
-  const handleOpinionSubmit = async (opinionAnswers: Record<number, string>) => {
+  const handleOpinionSubmit = async (answers: Record<number, string>) => {
+    setOpinionAnswers(answers);
     setSubmitting(true);
     setSubmitError('');
 
@@ -136,7 +138,7 @@ export default function SurveyForm() {
           otherDeptAnswers: position === '간부' ? otherDeptAnswers : undefined,
           managementScaleAnswers,
           managementTextAnswers,
-          opinionAnswers,
+          opinionAnswers: answers,
         }),
       });
 
@@ -189,6 +191,7 @@ export default function SurveyForm() {
               questions={ownDeptQuestions}
               onNext={handleOwnDeptSubmit}
               onBack={handleBack}
+              initialAnswers={ownDeptAnswers}
             />
           )}
         </>
@@ -206,6 +209,7 @@ export default function SurveyForm() {
               onNext={handleOtherDeptSubmit}
               onBack={handleBack}
               currentDepartment={department!}
+              initialAnswers={otherDeptAnswers}
             />
           )}
         </>
@@ -222,6 +226,8 @@ export default function SurveyForm() {
               questions={managementQuestions}
               onNext={handleManagementSubmit}
               onBack={handleBack}
+              initialScaleAnswers={managementScaleAnswers}
+              initialTextAnswers={managementTextAnswers}
             />
           )}
         </>
@@ -240,6 +246,7 @@ export default function SurveyForm() {
               onBack={handleBack}
               submitting={submitting}
               submitError={submitError}
+              initialAnswers={opinionAnswers}
             />
           )}
         </>

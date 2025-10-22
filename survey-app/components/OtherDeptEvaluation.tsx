@@ -8,6 +8,7 @@ interface Props {
   onNext: (answers: Record<string, Record<string, number>>) => void;
   onBack: () => void;
   currentDepartment: string;
+  initialAnswers?: Record<string, Record<string, number>>;
 }
 
 const OTHER_DEPARTMENTS = [
@@ -27,10 +28,11 @@ export default function OtherDeptEvaluation({
   questions,
   onNext,
   onBack,
-  currentDepartment
+  currentDepartment,
+  initialAnswers = {}
 }: Props) {
   // answers[questionNumber][department] = score
-  const [answers, setAnswers] = useState<Record<string, Record<string, number>>>({});
+  const [answers, setAnswers] = useState<Record<string, Record<string, number>>>(initialAnswers);
   const [error, setError] = useState('');
 
   // Filter out current department from evaluation
@@ -99,14 +101,31 @@ export default function OtherDeptEvaluation({
     return acc;
   }, {} as Record<string, SurveyQuestion[]>);
 
+  const handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까? 작성 중인 내용은 저장되지 않습니다.')) {
+      return;
+    }
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-bold text-gray-900">타 부서/지사 평가</h2>
-          <span className="text-sm text-gray-600">
-            진행률: {getProgress()}%
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600">
+              진행률: {getProgress()}%
+            </span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              로그아웃
+            </button>
+          </div>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div

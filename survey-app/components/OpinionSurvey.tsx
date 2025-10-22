@@ -12,8 +12,12 @@ interface Props {
   submitError?: string;
 }
 
-export default function OpinionSurvey({ questions, onNext, onBack, submitting = false, submitError = '' }: Props) {
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+interface OpinionSurveyProps extends Props {
+  initialAnswers?: Record<number, string>;
+}
+
+export default function OpinionSurvey({ questions, onNext, onBack, submitting = false, submitError = '', initialAnswers = {} }: OpinionSurveyProps) {
+  const [answers, setAnswers] = useState<Record<number, string>>(initialAnswers);
   const [error, setError] = useState('');
 
   const handleChange = (questionNumber: number, value: string) => {
@@ -28,10 +32,10 @@ export default function OpinionSurvey({ questions, onNext, onBack, submitting = 
     e.preventDefault();
     setError('');
 
-    // 각 텍스트 필드가 입력되었다면 10자 이상이어야 함
+    // 모든 문항 필수 작성 (10자 이상)
     for (const question of questions) {
       const answer = answers[question.question_number] || '';
-      if (answer.length > 0 && answer.length < 10) {
+      if (answer.length < 10) {
         setError(`Q${question.question_number}번 문항은 최소 10자 이상 작성해주세요. (현재 ${answer.length}자)`);
         return;
       }
@@ -40,13 +44,32 @@ export default function OpinionSurvey({ questions, onNext, onBack, submitting = 
     onNext(answers);
   };
 
+  const handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까? 작성 중인 내용은 저장되지 않습니다.')) {
+      return;
+    }
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-900">종합 의견</h2>
-        <p className="text-sm text-gray-600 mt-2">
-          아래 질문에 대한 의견을 자유롭게 작성해주세요. (선택사항)
-        </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">종합 의견</h2>
+            <p className="text-sm text-gray-600 mt-2">
+              아래 질문에 대한 의견을 작성해주세요. (모든 문항 필수, 최소 10자 이상)
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="text-sm text-gray-600 hover:text-gray-900"
+          >
+            로그아웃
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -57,7 +80,7 @@ export default function OpinionSurvey({ questions, onNext, onBack, submitting = 
             questionText={question.question_text}
             value={answers[question.question_number] || ''}
             onChange={(value) => handleChange(question.question_number, value)}
-            required={false}
+            required={true}
           />
         ))}
 

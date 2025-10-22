@@ -8,10 +8,11 @@ interface Props {
   questions: SurveyQuestion[];
   onNext: (answers: Record<number, number>) => void;
   onBack: () => void;
+  initialAnswers?: Record<number, number>;
 }
 
-export default function OwnDeptSurvey({ questions, onNext, onBack }: Props) {
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+export default function OwnDeptSurvey({ questions, onNext, onBack, initialAnswers = {} }: Props) {
+  const [answers, setAnswers] = useState<Record<number, number>>(initialAnswers);
   const [error, setError] = useState('');
 
   const handleAnswerChange = (questionNumber: number, value: number) => {
@@ -59,14 +60,31 @@ export default function OwnDeptSurvey({ questions, onNext, onBack }: Props) {
     return acc;
   }, {} as Record<string, SurveyQuestion[]>);
 
+  const handleLogout = async () => {
+    if (!confirm('로그아웃 하시겠습니까? 작성 중인 내용은 저장되지 않습니다.')) {
+      return;
+    }
+    await fetch('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  };
+
   return (
     <div className="bg-white shadow rounded-lg p-6">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-xl font-bold text-gray-900">본인 소속 조직 평가</h2>
-          <span className="text-sm text-gray-600">
-            진행률: {getProgress()}% ({Object.keys(answers).length}/{questions.length})
-          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600">
+              진행률: {getProgress()}% ({Object.keys(answers).length}/{questions.length})
+            </span>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-sm text-gray-600 hover:text-gray-900"
+            >
+              로그아웃
+            </button>
+          </div>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
