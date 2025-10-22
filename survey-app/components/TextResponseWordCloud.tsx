@@ -1,5 +1,7 @@
 'use client';
 
+import { TagCloud } from 'react-tagcloud';
+
 interface TextResponseWordCloudProps {
   responses: {
     question_number: number;
@@ -47,13 +49,13 @@ export default function TextResponseWordCloud({
     });
   });
 
-  // 키워드 데이터 생성
-  const wordData = Object.entries(words)
-    .map(([text, count]) => ({ text, count }))
+  // react-tagcloud 형식으로 데이터 변환
+  const cloudData = Object.entries(words)
+    .map(([value, count]) => ({ value, count }))
     .sort((a, b) => b.count - a.count)
-    .slice(0, 20);
+    .slice(0, 30);
 
-  if (wordData.length === 0) {
+  if (cloudData.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
         키워드를 추출할 수 없습니다.
@@ -62,31 +64,25 @@ export default function TextResponseWordCloud({
   }
 
   const totalResponses = filteredResponses.length;
-  const maxCount = Math.max(...wordData.map(w => w.count));
 
   return (
     <div className="py-6">
       <div className="mb-4 text-sm text-gray-600">
-        총 {totalResponses}개의 응답 • 상위 {wordData.length}개 키워드
+        총 {totalResponses}개의 응답 • 상위 {cloudData.length}개 키워드
       </div>
 
-      {/* 키워드 빈도 차트 */}
-      <div className="space-y-2 mb-6">
-        {wordData.map((word, idx) => (
-          <div key={idx} className="flex items-center gap-3">
-            <div className="w-24 text-sm font-medium text-gray-700 text-right">
-              {word.text}
-            </div>
-            <div className="flex-1 bg-gray-100 rounded-full h-6 relative">
-              <div
-                className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
-                style={{ width: `${(word.count / maxCount) * 100}%` }}
-              >
-                <span className="text-xs text-white font-medium">{word.count}회</span>
-              </div>
-            </div>
-          </div>
-        ))}
+      {/* 워드클라우드 */}
+      <div className="bg-white rounded-lg border border-gray-200 p-8 mb-6" style={{ minHeight: '400px' }}>
+        <TagCloud
+          minSize={14}
+          maxSize={48}
+          tags={cloudData}
+          className="wordcloud"
+          colorOptions={{
+            luminosity: 'dark',
+            hue: 'blue',
+          }}
+        />
       </div>
 
       {/* 전체 응답 텍스트 */}
