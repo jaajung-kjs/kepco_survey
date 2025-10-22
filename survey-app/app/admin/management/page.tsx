@@ -2,6 +2,7 @@ import Link from 'next/link';
 import ManagementRadarChart from '@/components/ManagementRadarChart';
 import TextResponseWordCloud from '@/components/TextResponseWordCloud';
 import AIAnalysis from '@/components/AIAnalysis';
+import { extractKeywordsByQuestions } from '@/lib/textAnalysis';
 
 async function getManagementScores() {
   const res = await fetch(
@@ -47,6 +48,19 @@ export default async function ManagementAnalysisPage() {
     { number: 52, text: 'Q52. 개선이 가장 필요한 부분' },
     { number: 53, text: 'Q53. 관리처 발전을 위한 아이디어' },
   ];
+
+  // 키워드 추출 (AI 분석용)
+  const textKeywords = extractKeywordsByQuestions(
+    data.textResponses,
+    [40, 45, 50, 51, 52, 53],
+    10
+  );
+
+  // AI 분석에 전달할 데이터
+  const analysisData = {
+    ...data,
+    textKeywords,
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -159,7 +173,7 @@ export default async function ManagementAnalysisPage() {
         </div>
 
         {/* AI 분석 */}
-        <AIAnalysis data={data} type="management" />
+        <AIAnalysis data={analysisData} type="management" />
       </div>
     </div>
   );

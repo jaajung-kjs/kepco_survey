@@ -384,7 +384,7 @@ export async function getDepartmentQuestionScores(department: Department): Promi
       questionNumber: qNum,
       questionText: questionTexts.get(qNum) || `Q${qNum}`,
       average: Math.round(average * 10) / 10,
-      rank: rank > 0 ? rank : null,
+      rank: (rank !== null && rank > 0) ? rank : null,
       overallAverage: Math.round(overallAverage * 10) / 10,
     });
   }
@@ -476,7 +476,7 @@ export async function getOtherDeptQuestionScores(department: Department): Promis
       questionNumber: qNum,
       questionText: otherQuestionTexts.get(qNum) || `타부서 평가 Q${qNum}`,
       average: Math.round(average * 10) / 10,
-      rank: rank > 0 ? rank : null,
+      rank: (rank !== null && rank > 0) ? rank : null,
       overallAverage: Math.round(overallAverage * 10) / 10,
     });
   }
