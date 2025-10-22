@@ -184,7 +184,7 @@ export default async function RankingPage() {
                   <h3 className="text-xl font-bold">{deptData.department}</h3>
                 </div>
                 <div className="p-6">
-                  <AIAnalysis data={deptData} type="department" />
+                  <AIAnalysis data={deptData} type="department" targetKey={deptData.department} />
                 </div>
               </div>
             ))}

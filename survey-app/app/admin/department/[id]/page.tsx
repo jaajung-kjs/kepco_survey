@@ -218,7 +218,7 @@ export default async function DepartmentAnalysisPage({
         </div>
 
         {/* AI 분석 */}
-        <AIAnalysis data={data} type="department" />
+        <AIAnalysis data={data} type="department" targetKey={department} />
       </div>
     </div>
   );
