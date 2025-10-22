@@ -96,64 +96,69 @@ export default async function RankingPage() {
           <p className="text-gray-600 mt-2">부서별 종합 순위 및 평가유형별 순위</p>
         </div>
 
-        {/* 종합 순위 테이블 */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">종합 순위 상세</h2>
+        {/* 종합 순위 테이블 - 최신 트렌드 디자인 */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+          <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <h2 className="text-lg font-bold text-gray-900">종합 순위</h2>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b">
-                  <th className="text-center py-3 px-4">순위</th>
-                  <th className="text-left py-3 px-4">부서명</th>
-                  <th className="text-center py-3 px-4">평균 점수</th>
-                  <th className="text-center py-3 px-4">상세 분석</th>
+                <tr className="bg-gray-50 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-center py-3 px-4 w-20">순위</th>
+                  <th className="text-left py-3 px-6">부서명</th>
+                  <th className="text-center py-3 px-4 w-28">평균 점수</th>
+                  <th className="text-center py-3 px-4 w-32"></th>
                 </tr>
               </thead>
-              <tbody>
-                {overallRankings.map((item: any) => (
-                  <tr key={item.department} className="border-b hover:bg-gray-50">
-                    <td className="text-center py-4 px-4">
-                      <div className="flex items-center justify-center">
-                        {item.rank === 1 ? (
-                          <div className="flex flex-col items-center">
-                            <span className="text-3xl">🥇</span>
-                            <span className="text-xs font-semibold text-yellow-600 mt-1">1위</span>
-                          </div>
-                        ) : item.rank === 2 ? (
-                          <div className="flex flex-col items-center">
-                            <span className="text-3xl">🥈</span>
-                            <span className="text-xs font-semibold text-gray-500 mt-1">2위</span>
-                          </div>
-                        ) : item.rank === 3 ? (
-                          <div className="flex flex-col items-center">
-                            <span className="text-3xl">🥉</span>
-                            <span className="text-xs font-semibold text-orange-600 mt-1">3위</span>
-                          </div>
-                        ) : (
-                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-lg shadow-md">
-                            {item.rank}
-                          </span>
-                        )}
+              <tbody className="divide-y divide-gray-100">
+                {overallRankings.map((item: any, index: number) => (
+                  <tr
+                    key={item.department}
+                    className="hover:bg-blue-50/50 transition-colors group"
+                  >
+                    <td className="text-center py-3 px-4">
+                      {item.rank === 1 ? (
+                        <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-500 text-white font-bold text-sm shadow-sm">
+                          1
+                        </div>
+                      ) : item.rank === 2 ? (
+                        <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-gray-300 to-gray-400 text-white font-bold text-sm shadow-sm">
+                          2
+                        </div>
+                      ) : item.rank === 3 ? (
+                        <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-orange-400 to-orange-500 text-white font-bold text-sm shadow-sm">
+                          3
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 text-white font-semibold text-sm">
+                          {item.rank}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-3 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold">
+                          {item.department.substring(0, 2)}
+                        </div>
+                        <span className="font-semibold text-gray-900 text-sm">{item.department}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4">
-                      <span className="font-semibold text-gray-900">{item.department}</span>
-                    </td>
-                    <td className="text-center py-4 px-4">
-                      <div className="flex flex-col items-center">
-                        <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
+                    <td className="text-center py-3 px-4">
+                      <div className="inline-flex flex-col items-center">
+                        <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                           {item.score.toFixed(2)}
                         </span>
-                        <span className="text-xs text-gray-500">점</span>
+                        <span className="text-xs text-gray-400">점</span>
                       </div>
                     </td>
-                    <td className="text-center py-4 px-4">
+                    <td className="text-center py-3 px-4">
                       <Link
                         href={`/admin/department/${encodeURIComponent(item.department)}`}
-                        className="inline-flex items-center px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium rounded-lg transition-colors"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all group-hover:bg-blue-100"
                       >
-                        상세 보기
-                        <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        상세
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                         </svg>
                       </Link>
