@@ -22,22 +22,22 @@ export default function ScaleQuestion({
   ];
 
   return (
-    <div className="border-b border-gray-200 pb-6 mb-6">
-      <div className="mb-4">
+    <div className="border-b border-gray-200 pb-3 mb-3">
+      <div className="mb-2">
         <label className="block text-sm font-medium text-gray-900">
           Q{questionNumber}. {questionText}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       </div>
 
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-5 gap-1.5">
         {scales.map((scale) => (
           <button
             key={scale.value}
             type="button"
             onClick={() => onChange(scale.value)}
             className={`
-              px-4 py-3 text-sm font-medium rounded-lg border-2 transition-all
+              px-2 py-1.5 text-xs font-medium rounded border-2 transition-all
               ${
                 value === scale.value
                   ? 'border-blue-600 bg-blue-50 text-blue-700'
@@ -46,8 +46,8 @@ export default function ScaleQuestion({
             `}
           >
             <div className="text-center">
-              <div className="text-lg font-bold mb-1">{scale.value}</div>
-              <div className="text-xs leading-tight">{scale.label}</div>
+              <div className="text-sm font-bold mb-0.5">{scale.value}</div>
+              <div className="text-[10px] leading-tight">{scale.label}</div>
             </div>
           </button>
         ))}
