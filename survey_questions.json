@@ -1,0 +1,426 @@
+[
+  {
+    "question_number": 1,
+    "evaluation_target": "기본정보",
+    "evaluation_type": "-",
+    "question_text": "소속을 선택해 주세요. (부서 또는 지사)",
+    "response_type": "선다형",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 2,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사는 구성원 간 신뢰와 존중의 분위기가 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 3,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사는 의사결정 과정이 투명하고 공정하다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 4,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사의 리더는 구성원의 의견을 경청하고 반영한다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 5,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사 구성원들은 자율성과 책임감을 가지고 일한다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 6,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사는 구성원 간 협력과 정보공유가 활발하다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 7,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사의 업무분담은 효율적이고 공정하다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 8,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사는 성과에 대해 공정한 평가와 피드백이 이루어진다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 9,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "조직문화",
+    "question_text": "우리 부서/지사의 분위기는 전체적으로 긍정적이고 활기차다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 10,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무충실",
+    "question_text": "우리 부서/지사는 업무 목표와 역할이 명확히 공유되어 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 11,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무충실",
+    "question_text": "우리 부서/지사는 설정된 목표를 성실히 달성한다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 12,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무충실",
+    "question_text": "우리 부서/지사는 업무 효율성과 실행력이 높다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 13,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무충실",
+    "question_text": "우리 부서/지사는 전문지식과 기술 역량이 우수하다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 14,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무충실",
+    "question_text": "우리 부서/지사는 문제해결 및 위기대응 능력이 뛰어나다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 15,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무충실",
+    "question_text": "우리 부서/지사의 성과는 관리처 평균보다 높다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 16,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무협조",
+    "question_text": "우리 부서/지사는 타 조직과 협업 능력이 높다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 17,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무협조",
+    "question_text": "우리 부서/지사는 타 조직의 주요 역할과 업무내용을 충분히 이해하고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 18,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무협조",
+    "question_text": "우리 부서/지사는 타 조직의 주요 성과나 추진현황을 파악하고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 19,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무혁신",
+    "question_text": "우리 부서/지사는 변화나 개선 제안에 열린 태도를 보인다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 20,
+    "evaluation_target": "본인 소속 조직",
+    "evaluation_type": "업무혁신",
+    "question_text": "우리 부서/지사는 혁신적 개선활동을 적극 추진한다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 21,
+    "evaluation_target": "타 부서/지사",
+    "evaluation_type": "업무충실",
+    "question_text": "조직 및 구성원의 업무수행 역량이 우수하다.",
+    "response_type": "5점척도",
+    "for_executives_only": true
+  },
+  {
+    "question_number": 22,
+    "evaluation_target": "타 부서/지사",
+    "evaluation_type": "업무충실",
+    "question_text": "올 한 해 우수한 업무 성과를 달성하고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": true
+  },
+  {
+    "question_number": 23,
+    "evaluation_target": "타 부서/지사",
+    "evaluation_type": "업무협조",
+    "question_text": "조직 간 갈등해결에 유연하고 적극적이다.",
+    "response_type": "5점척도",
+    "for_executives_only": true
+  },
+  {
+    "question_number": 24,
+    "evaluation_target": "타 부서/지사",
+    "evaluation_type": "업무협조",
+    "question_text": "조직 간 협업에 적극적이다.",
+    "response_type": "5점척도",
+    "for_executives_only": true
+  },
+  {
+    "question_number": 25,
+    "evaluation_target": "타 부서/지사",
+    "evaluation_type": "업무혁신",
+    "question_text": "구성원 직무능력 개발, 업무개선 등 혁신업무 실적이 우수하다.",
+    "response_type": "5점척도",
+    "for_executives_only": true
+  },
+  {
+    "question_number": 26,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "관리처 내 의사결정은 투명하고 합리적이다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 27,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "관리처의 인사·평가 제도는 공정하다고 느낀다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 28,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "인력배치 및 인사운영은 공정하게 이루어진다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 29,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "관리처는 구성원의 의견을 경청하고 정책에 반영한다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 30,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "관리처 전체의 조직문화는 건강하고 일체감이 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 31,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "구성원들이 관리처의 발전방향 논의에 적극 참여할 수 있는 분위기다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 32,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "관리처의 업무 프로세스는 효율적으로 운영되고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 33,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "리더십은 구성원의 의견을 수용하고 반영한다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 34,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "조직문화",
+    "question_text": "직무 전문성 개발을 위한 지원이 충분하다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 35,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무충실",
+    "question_text": "관리처의 리더십은 명확한 방향성과 목표를 제시한다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 36,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무충실",
+    "question_text": "관리처의 주요 전략과 추진방향을 구성원들이 충분히 이해하고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 37,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무충실",
+    "question_text": "관리처 구성원은 목표 달성을 위해 함께 노력하고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 38,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "관리처는 구성원 간 협업과 소통을 중요하게 다룬다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 39,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "관리처 전체 차원에서 협업 체계는 체계적으로 운영되고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 40,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "(협업이 체계적이지 않다면) 협업이 원활하지 않은 주요 이유는 무엇입니까?",
+    "response_type": "서술형",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 41,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "협업과 소통을 촉진하기 위한 제도적 장치가 효과적이다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 42,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "관리처 내 정보공유가 원활히 이루어지고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 43,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "관리처 내 협업 시 소통 방식(회의, 보고 등)은 효율적이다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 44,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "관리처 내 협력관계는 신뢰와 존중을 기반으로 하고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 45,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무협조",
+    "question_text": "관리처 내 협업 개선을 위해 필요한 조치는 무엇이라고 생각하십니까?",
+    "response_type": "서술형",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 46,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무혁신",
+    "question_text": "관리처는 구성원 역량 향상(교육, 지원)에 관심을 가지고 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 47,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무혁신",
+    "question_text": "관리처 구성원은 변화하는 환경에 대응할 준비가 되어 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 48,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무혁신",
+    "question_text": "혁신 아이디어가 실현될 수 있는 문화가 조성되어 있다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 49,
+    "evaluation_target": "관리처 전반",
+    "evaluation_type": "업무혁신",
+    "question_text": "학습과 지식공유 활동이 활발하다.",
+    "response_type": "5점척도",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 50,
+    "evaluation_target": "종합 의견",
+    "evaluation_type": "-",
+    "question_text": "향후 관리처가 집중해야 할 핵심 분야는 무엇이라고 생각하십니까?",
+    "response_type": "서술형",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 51,
+    "evaluation_target": "종합 의견",
+    "evaluation_type": "-",
+    "question_text": "관리처 내 역량 차이를 줄이기 위해 필요한 조치는 무엇이라고 생각하십니까?",
+    "response_type": "서술형",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 52,
+    "evaluation_target": "종합 의견",
+    "evaluation_type": "-",
+    "question_text": "개선이 가장 필요하다고 생각하는 부분은 무엇입니까?",
+    "response_type": "서술형",
+    "for_executives_only": false
+  },
+  {
+    "question_number": 53,
+    "evaluation_target": "종합 의견",
+    "evaluation_type": "-",
+    "question_text": "관리처 발전을 위해 제안하고 싶은 아이디어가 있다면 작성해주세요.",
+    "response_type": "서술형",
+    "for_executives_only": false
+  }
+]
