@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -9,6 +9,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // 컴포넌트 마운트 시 강제 로그아웃 (쿠키 정리)
+  useEffect(() => {
+    const forceLogout = async () => {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          cache: 'no-store',
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    };
+    forceLogout();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

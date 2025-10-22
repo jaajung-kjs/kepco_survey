@@ -13,7 +13,7 @@ async function getDepartmentScores(department: string) {
   const data = allData.find((d) => d.department === department);
 
   if (!data) {
-    throw new Error('Department not found');
+    throw new Error(`Department not found: ${department}`);
   }
 
   // 세부 문항별 점수 조회
