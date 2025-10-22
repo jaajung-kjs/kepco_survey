@@ -37,7 +37,7 @@ export default function ScaleQuestion({
             type="button"
             onClick={() => onChange(scale.value)}
             className={`
-              px-2 py-1 text-xs font-medium rounded border-2 transition-all
+              px-2 py-1.5 text-sm font-medium rounded border-2 transition-all
               ${
                 value === scale.value
                   ? 'border-blue-600 bg-blue-50 text-blue-700'
@@ -45,7 +45,7 @@ export default function ScaleQuestion({
               }
             `}
           >
-            <div className="text-center text-xs leading-tight">{scale.label}</div>
+            <div className="text-center text-sm leading-tight">{scale.label}</div>
           </button>
         ))}
       </div>
