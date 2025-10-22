@@ -95,7 +95,7 @@ export default function ManagementSurvey({ questions, onNext, onBack }: Props) {
       <form onSubmit={handleSubmit}>
         {Object.entries(groupedQuestions).map(([type, typeQuestions]) => (
           <div key={type} className="mb-4">
-            <h3 className="text-base font-semibold text-gray-800 mb-2 pb-1 border-b-2 border-gray-300">
+            <h3 className="text-lg font-bold text-gray-900 mb-2 pb-1 border-b-2 border-blue-500">
               {type}
             </h3>
             {typeQuestions.map((question) => {

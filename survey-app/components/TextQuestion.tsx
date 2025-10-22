@@ -18,7 +18,7 @@ export default function TextQuestion({
   return (
     <div className="border-b border-gray-200 pb-3 mb-3">
       <div className="mb-2">
-        <label className="block text-sm font-medium text-gray-900">
+        <label className="block text-base font-medium text-gray-900">
           Q{questionNumber}. {questionText}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
