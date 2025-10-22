@@ -231,34 +231,87 @@ CREATE TABLE survey_questions (
 - 완료 메시지 표시
 - 재제출 불가
 
-### 3. 관리자 대시보드 (`/admin`)
+### 3. 관리자 대시보드 (`/admin`) ✅ **구현 완료**
 
-#### 3.1 전체 현황 (`/admin/dashboard`)
-- 응답률 현황 (부서별, 직급별)
-- 진행 상황 실시간 모니터링
-- 부서별 필터링 버튼
+#### 3.1 전체 현황 (`/admin/dashboard`) ✅
+**구현 내역**:
+- 페이지: `app/admin/dashboard/page.tsx`
+- API: `/api/admin/stats` (전체/부서별 응답 통계)
+- 전체 응답 현황 카드 (전체 대상, 응답 완료, 응답률)
+- 부서별 응답 현황 테이블 (10개 부서, 응답률 색상 표시)
+- 메뉴 링크 (관리처 전반 분석, 전체 순위, 로그아웃)
 
-#### 3.2 부서별 분석 (`/admin/department/[id]`)
-- **레이더 차트**: 4개 평가유형 점수 시각화
+**기술 스택**:
+- Next.js 15 Server Components
+- Supabase users 테이블 조회
+- username 파싱으로 부서별 응답 집계
+
+#### 3.2 부서별 분석 (`/admin/department/[id]`) ✅
+**구현 내역**:
+- 페이지: `app/admin/department/[id]/page.tsx`
+- 컴포넌트: `DepartmentRadarChart.tsx`, `AIAnalysis.tsx`
+- API: `/api/scores/department?department={dept}`
+- **레이더 차트**: 4개 평가유형 점수 시각화 (Recharts)
+  - 본인평가 vs 타부서평가 비교
+  - 조직문화, 업무충실, 업무협조, 업무혁신
 - **점수 상세 테이블**:
-  | 평가유형 |  최종 점수 | 순위 |
-  |---------|----------|------|
-  | 조직문화 |  4.1점 | 2위 |
-  | 업무충실 |  3.8점 (타부서 -0.7) | 1위 |
+  | 평가유형 | 본인평가 | 타부서평가 | 최종점수 | 차이 | 순위 |
+  |---------|----------|-----------|---------|------|------|
+  | 조직문화 |  4.1점 | - | 4.1점 | - | 2위 |
+  | 업무충실 |  4.5점 | 3.8점 | 3.8점 | -0.7 | 1위 |
 - **AI 종합평가**: GPT-4 기반 분석
   - 강점 분야
   - 개선 필요 분야
   - 자체평가 vs 타부서평가 차이 분석
   - 구체적 개선 제안
 
-#### 3.3 관리처 분석 (`/admin/management`)
-- **레이더 차트**: 5점척도 문항 평균
-- **서술형 워드클라우드**: 키워드 시각화
+**기술적 특징**:
+- Next.js 15 async params 처리 (`await params`)
+- API 응답 변환 계층 (scores → byType)
+- react-markdown으로 AI 분석 렌더링
+
+#### 3.3 관리처 분석 (`/admin/management`) ✅
+**구현 내역**:
+- 페이지: `app/admin/management/page.tsx`
+- 컴포넌트: `ManagementRadarChart.tsx`, `TextResponseWordCloud.tsx`, `AIAnalysis.tsx`
+- API: `/api/scores/management`
+- **레이더 차트**: 5점척도 문항 평균 (Recharts)
+  - 조직문화, 업무충실, 업무협조, 업무혁신
+- **평가유형별 평균 점수 테이블**
+- **세부 문항별 점수 테이블**
+- **서술형 워드클라우드**: 키워드 시각화 (react-wordcloud)
+  - 6개 서술형 문항별 워드클라우드
+  - Q40, Q45, Q50, Q51, Q52, Q53
 - **AI 분석**: 5점척도 문항 종합평가
 
-#### 3.4 전체 순위 (`/admin/ranking`)
-- 부서별 종합 순위 (바 차트)
-- 평가유형별 부서 순위 (바 차트)
+**기술적 특징**:
+- API 응답 변환 (scores → byType, questions, textResponses)
+- 한글 텍스트 처리 및 워드클라우드 생성
+- 평가유형별 문항 그룹화
+
+#### 3.4 전체 순위 (`/admin/ranking`) ✅
+**구현 내역**:
+- 페이지: `app/admin/ranking/page.tsx`
+- 컴포넌트: `RankingBarChart.tsx`
+- API: `/api/scores/department` (전체 부서)
+- **부서별 종합 순위 차트** (Recharts 바 차트)
+  - 10개 부서 순위 표시
+  - 평균 점수 표시
+- **종합 순위 상세 테이블**
+  - 순위 뱃지 (1위 금, 2위 은, 3위 동)
+  - 평균 점수
+  - 상세 분석 링크
+- **평가유형별 순위 차트** (4개)
+  - 조직문화 순위 차트
+  - 업무충실 순위 차트
+  - 업무협조 순위 차트
+  - 업무혁신 순위 차트
+  - 그리드 레이아웃 (2×2)
+
+**기술적 특징**:
+- 전체 부서 점수 데이터 로드 및 변환
+- 평가유형별 순위 데이터 생성
+- 종합 순위 계산 (4개 평가유형 평균)
 
 ---
 

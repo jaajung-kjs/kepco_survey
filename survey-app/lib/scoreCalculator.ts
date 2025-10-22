@@ -82,48 +82,69 @@ export async function calculateDepartmentScores(department: Department): Promise
   for (const [evalType, questions] of Object.entries(QUESTION_EVALUATION_MAP)) {
     const evaluationType = evalType as EvaluationType;
 
-    // 본인평가 평균 계산
-    let totalSum = 0;
-    let totalCount = 0;
+    // 본인평가 평균 계산 (문항별 평균의 평균)
+    let ownSum = 0;
+    let ownCount = 0;
+    let ownRespondentCount = 0;
 
     for (const qNum of questions) {
       const sum = deptData[`q${qNum}_sum`] || 0;
       const count = deptData[`q${qNum}_count`] || 0;
-      totalSum += sum;
-      totalCount += count;
+      ownSum += sum;
+      ownCount += count;
+      // 응답자 수는 첫 번째 문항의 count로 확인 (모든 문항 동일 응답자)
+      if (ownRespondentCount === 0 && count > 0) {
+        ownRespondentCount = count;
+      }
     }
 
-    const ownScore = totalCount > 0 ? totalSum / totalCount : 0;
+    const ownScore = ownCount > 0 ? ownSum / ownCount : 0;
+    const hasOwnScore = ownRespondentCount > 0;
 
     // 타부서평가 평균 계산
-    let otherScore: number | null = null;
+    let otherSum = 0;
+    let otherCount = 0;
+    let otherRespondentCount = 0;
     const otherQuestions = OTHER_DEPT_EVALUATION_MAP[evaluationType as keyof typeof OTHER_DEPT_EVALUATION_MAP];
 
     if (otherQuestions && otherQuestions.length > 0) {
-      let otherSum = 0;
-      let otherCount = 0;
-
       for (const otherQNum of otherQuestions) {
         const sum = deptData[`other_q${otherQNum}_sum`] || 0;
         const count = deptData[`other_q${otherQNum}_count`] || 0;
         otherSum += sum;
         otherCount += count;
+        // 응답자 수는 첫 번째 문항의 count로 확인
+        if (otherRespondentCount === 0 && count > 0) {
+          otherRespondentCount = count;
+        }
       }
-
-      otherScore = otherCount > 0 ? otherSum / otherCount : null;
     }
 
-    // 최종 점수 계산 (Weighted Sum)
-    // SPEC: 본인평가와 타부서평가가 모두 있으면 가중평균, 없으면 본인평가만
+    const otherScore = otherCount > 0 ? otherSum / otherCount : 0;
+    const hasOtherScore = otherRespondentCount > 0;
+
+    // 최종 점수 계산 (가중평균)
+    // 로직:
+    // 1. 본인평가와 타부서평가가 모두 있으면 가중평균 (응답자 수 반영)
+    //    공식: (본인평가 평균 × 본인 응답자 수 + 타부서평가 평균 × 타부서 응답자 수) / (본인 응답자 수 + 타부서 응답자 수)
+    // 2. 본인평가만 있으면 본인평가
+    // 3. 타부서평가만 있으면 타부서평가
+    // 4. 둘 다 없으면 0점
     let finalScore: number;
     let difference: number | null = null;
 
-    if (otherScore !== null) {
-      // 가중평균: (본인평가 + 타부서평가) / 2
-      finalScore = (ownScore + otherScore) / 2;
+    if (hasOwnScore && hasOtherScore) {
+      // 가중평균: (본인평가 × 본인 응답자 수 + 타부서평가 × 타부서 응답자 수) / (본인 응답자 수 + 타부서 응답자 수)
+      finalScore = (ownScore * ownRespondentCount + otherScore * otherRespondentCount) / (ownRespondentCount + otherRespondentCount);
       difference = finalScore - ownScore;
+    } else if (hasOtherScore) {
+      // 타부서평가만 있는 경우
+      finalScore = otherScore;
+      difference = null;
     } else {
+      // 본인평가만 있거나 둘 다 없는 경우
       finalScore = ownScore;
+      difference = null;
     }
 
     evaluationScores.push({
