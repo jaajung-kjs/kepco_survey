@@ -147,13 +147,13 @@ export default function OtherDeptEvaluation({
       <form onSubmit={handleSubmit}>
         {Object.entries(groupedQuestions).map(([type, typeQuestions]) => (
           <div key={type} className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 pb-2 border-b-2 border-gray-300">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 pb-1 border-b-2 border-blue-500">
               {type}
             </h3>
 
             {typeQuestions.map((question) => (
               <div key={question.question_number} className="mb-8">
-                <h4 className="text-sm font-medium text-gray-900 mb-4">
+                <h4 className="text-base font-medium text-gray-900 mb-4">
                   Q{question.question_number}. {question.question_text}
                   <span className="text-red-500 ml-1">*</span>
                 </h4>
@@ -162,28 +162,23 @@ export default function OtherDeptEvaluation({
                   <table className="min-w-full border-collapse border border-gray-300">
                     <thead>
                       <tr className="bg-gray-50">
-                        <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium text-gray-700">
+                        <th className="border border-gray-300 px-4 py-3 text-left text-sm font-medium text-gray-700">
                           부서명
                         </th>
-                        <th className="border border-gray-300 px-2 py-2 text-center text-xs font-medium text-gray-700">
-                          1점<br/>
-                          <span className="text-xs font-normal">전혀<br/>그렇지<br/>않다</span>
+                        <th className="border border-gray-300 px-3 py-3 text-center text-sm font-medium text-gray-700">
+                          전혀<br/>그렇지<br/>않다
                         </th>
-                        <th className="border border-gray-300 px-2 py-2 text-center text-xs font-medium text-gray-700">
-                          2점<br/>
-                          <span className="text-xs font-normal">그렇지<br/>않다</span>
+                        <th className="border border-gray-300 px-3 py-3 text-center text-sm font-medium text-gray-700">
+                          그렇지<br/>않다
                         </th>
-                        <th className="border border-gray-300 px-2 py-2 text-center text-xs font-medium text-gray-700">
-                          3점<br/>
-                          <span className="text-xs font-normal">보통<br/>이다</span>
+                        <th className="border border-gray-300 px-3 py-3 text-center text-sm font-medium text-gray-700">
+                          보통<br/>이다
                         </th>
-                        <th className="border border-gray-300 px-2 py-2 text-center text-xs font-medium text-gray-700">
-                          4점<br/>
-                          <span className="text-xs font-normal">그렇다</span>
+                        <th className="border border-gray-300 px-3 py-3 text-center text-sm font-medium text-gray-700">
+                          그렇다
                         </th>
-                        <th className="border border-gray-300 px-2 py-2 text-center text-xs font-medium text-gray-700">
-                          5점<br/>
-                          <span className="text-xs font-normal">매우<br/>그렇다</span>
+                        <th className="border border-gray-300 px-3 py-3 text-center text-sm font-medium text-gray-700">
+                          매우<br/>그렇다
                         </th>
                       </tr>
                     </thead>
