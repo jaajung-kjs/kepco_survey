@@ -17,8 +17,21 @@ async function getDepartmentScores(department: string) {
 
   const allData = await res.json();
 
+  type ScoreData = {
+    evaluationType: string;
+    ownScore: number;
+    otherScore?: number;
+    finalScore: number;
+    rank?: number;
+  };
+
+  interface AllDeptData {
+    department: string;
+    scores?: ScoreData[];
+  }
+
   // 해당 부서의 데이터만 필터링
-  const data = allData.find((d: any) => d.department === department);
+  const data = allData.find((d: AllDeptData) => d.department === department);
 
   if (!data) {
     throw new Error('Department not found');
@@ -31,7 +44,7 @@ async function getDepartmentScores(department: string) {
   // API 응답을 페이지가 기대하는 형식으로 변환
   return {
     department: data.department,
-    byType: data.scores?.map((score: any) => ({
+    byType: data.scores?.map((score: ScoreData) => ({
       evaluation_type: score.evaluationType,
       own_avg: score.ownScore,
       other_avg: score.otherScore || 0,
@@ -89,7 +102,7 @@ export default async function DepartmentAnalysisPage({
                 </tr>
               </thead>
               <tbody>
-                {data.byType.map((type: any) => {
+                {data.byType.map((type: { evaluation_type: string; own_avg: number; other_avg: number; final_avg: number; rank: number | null }) => {
                   const diff = type.final_avg - type.own_avg;
                   const hasOtherEval = type.other_avg > 0;
 
@@ -145,7 +158,7 @@ export default async function DepartmentAnalysisPage({
                 </tr>
               </thead>
               <tbody>
-                {data.questions.map((q: any) => {
+                {data.questions.map((q: { questionNumber: number; questionText: string; average: number; overallAverage: number; rank: number | null }) => {
                   return (
                     <tr key={q.questionNumber} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm">
@@ -188,7 +201,7 @@ export default async function DepartmentAnalysisPage({
                 </tr>
               </thead>
               <tbody>
-                {data.otherQuestions.map((q: any) => {
+                {data.otherQuestions.map((q: { questionNumber: number; questionText: string; average: number; overallAverage: number; rank: number | null }) => {
                   return (
                     <tr key={q.questionNumber} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm">

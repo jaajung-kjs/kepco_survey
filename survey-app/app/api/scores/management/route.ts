@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { calculateManagementScores, getTextResponses } from '@/lib/scoreCalculator';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 관리처 5점척도 점수 계산
     const scores = await calculateManagementScores();

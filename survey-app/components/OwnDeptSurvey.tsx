@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ScaleQuestion from './ScaleQuestion';
 import type { SurveyQuestion } from '@/types';
 

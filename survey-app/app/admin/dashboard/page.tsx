@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { DEPARTMENTS } from '@/lib/constants';
 import DepartmentRadarChartSmall from '@/components/DepartmentRadarChartSmall';
 
 async function getStats() {
@@ -26,9 +25,17 @@ async function getAllDepartmentScores() {
 
   const data = await res.json();
 
-  return data.map((dept: any) => ({
+  interface DeptScore {
+    department: string;
+    scores?: Array<{
+      evaluationType: string;
+      finalScore: number;
+    }>;
+  }
+
+  return data.map((dept: DeptScore) => ({
     department: dept.department,
-    byType: dept.scores?.map((score: any) => ({
+    byType: dept.scores?.map((score) => ({
       evaluation_type: score.evaluationType,
       final_avg: score.finalScore,
     })) || [],
@@ -99,7 +106,7 @@ export default async function AdminDashboard() {
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-semibold mb-6">부서별 평가 현황</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {allScores.map((dept: any) => (
+            {allScores.map((dept: { department: string; byType: Array<{ evaluation_type: string; final_avg: number }> }) => (
               <Link
                 key={dept.department}
                 href={`/admin/department/${encodeURIComponent(dept.department)}`}

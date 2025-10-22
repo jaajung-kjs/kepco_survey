@@ -3,8 +3,22 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
+interface QuestionScore {
+  questionNumber: number;
+  questionText: string;
+  average: number;
+  rank: number | null;
+  overallAverage: number;
+}
+
 interface AIAnalysisProps {
-  data: any;
+  data: {
+    byType: Array<{ evaluation_type: string; final_avg?: number; avg_score?: number; own_avg?: number; other_avg?: number; rank?: number | null }>;
+    questions?: QuestionScore[] | Array<{ question_number: number; question_text: string; avg_score: number; evaluation_type: string; response_count: number }>;
+    textResponses?: Array<{ question_number: number; question_text: string; response_text: string }>;
+    department?: string;
+    otherQuestions?: QuestionScore[];
+  };
   type: 'department' | 'management';
   targetKey?: string; // department name for department analysis
 }
@@ -19,6 +33,7 @@ export default function AIAnalysis({ data, type, targetKey }: AIAnalysisProps) {
   // 컴포넌트 마운트 시 저장된 분석 확인
   useEffect(() => {
     checkCachedAnalysis();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, targetKey]);
 
   const checkCachedAnalysis = async () => {
@@ -50,7 +65,7 @@ export default function AIAnalysis({ data, type, targetKey }: AIAnalysisProps) {
     }
   };
 
-  const generateAnalysis = async (isRegenerate = false) => {
+  const generateAnalysis = async () => {
     setLoading(true);
     setError(null);
 
@@ -128,7 +143,7 @@ export default function AIAnalysis({ data, type, targetKey }: AIAnalysisProps) {
         <h2 className="text-xl font-semibold">AI 종합 분석</h2>
         {analysis && !loading && (
           <button
-            onClick={() => generateAnalysis(true)}
+            onClick={() => generateAnalysis()}
             className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +160,7 @@ export default function AIAnalysis({ data, type, targetKey }: AIAnalysisProps) {
             AI가 데이터를 분석하여 객관적인 인사이트를 제공합니다.
           </p>
           <button
-            onClick={() => generateAnalysis(false)}
+            onClick={() => generateAnalysis()}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             AI 분석 생성하기

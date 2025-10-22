@@ -41,7 +41,7 @@ export default function LoginPage() {
       } else {
         router.push('/survey');
       }
-    } catch (err) {
+    } catch {
       setError('로그인 중 오류가 발생했습니다.');
       setLoading(false);
     }

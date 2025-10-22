@@ -16,15 +16,34 @@ async function getManagementScores() {
 
   const data = await res.json();
 
+  interface Question {
+    questionNumber: number;
+    questionText: string;
+    average: number;
+  }
+
+  interface Score {
+    evaluationType: string;
+    average: number;
+    questions?: Question[];
+  }
+
+  interface ApiResponse {
+    scores?: Score[];
+    textResponses?: Array<{ question_number: number; question_text: string; response_text: string }>;
+  }
+
+  const apiData = data as ApiResponse;
+
   // API 응답을 페이지가 기대하는 형식으로 변환
   return {
-    byType: data.scores?.map((score: any) => ({
+    byType: apiData.scores?.map((score) => ({
       evaluation_type: score.evaluationType,
       avg_score: score.average,
-      response_count: score.questions?.reduce((sum: number, q: any) => sum + (q.average > 0 ? 1 : 0), 0) || 0,
+      response_count: score.questions?.reduce((sum, q) => sum + (q.average > 0 ? 1 : 0), 0) || 0,
     })) || [],
-    questions: data.scores?.flatMap((score: any) =>
-      score.questions?.map((q: any) => ({
+    questions: apiData.scores?.flatMap((score) =>
+      score.questions?.map((q) => ({
         question_number: q.questionNumber,
         question_text: q.questionText,
         evaluation_type: score.evaluationType,
@@ -32,7 +51,7 @@ async function getManagementScores() {
         response_count: 0,
       })) || []
     ) || [],
-    textResponses: data.textResponses || [],
+    textResponses: apiData.textResponses || [],
   };
 }
 
@@ -95,7 +114,7 @@ export default async function ManagementAnalysisPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.byType.map((type: any) => (
+                {data.byType.map((type: { evaluation_type: string; avg_score: number; response_count: number }) => (
                   <tr key={type.evaluation_type} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{type.evaluation_type}</td>
                     <td className="text-center py-3 px-4">
@@ -114,9 +133,9 @@ export default async function ManagementAnalysisPage() {
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4">세부 문항별 점수</h2>
           <div className="space-y-6">
-            {data.byType.map((type: any) => {
+            {data.byType.map((type: { evaluation_type: string; avg_score: number; response_count: number }) => {
               const questions = data.questions.filter(
-                (q: any) => q.evaluation_type === type.evaluation_type && q.avg_score > 0
+                (q: { evaluation_type: string; avg_score: number }) => q.evaluation_type === type.evaluation_type && q.avg_score > 0
               );
 
               if (questions.length === 0) return null;
@@ -135,7 +154,7 @@ export default async function ManagementAnalysisPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {questions.map((q: any) => (
+                        {questions.map((q: { question_number: number; question_text: string; evaluation_type: string; avg_score: number; response_count: number }) => (
                           <tr key={q.question_number} className="border-b hover:bg-gray-50">
                             <td className="py-2 px-4 text-sm">
                               <span className="font-medium text-gray-700">Q{q.question_number}.</span> {q.question_text}

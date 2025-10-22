@@ -16,10 +16,19 @@ async function getAllDepartmentScores() {
 
   const data = await res.json();
 
+  interface DeptScore {
+    department: string;
+    scores?: Array<{
+      evaluationType: string;
+      finalScore: number;
+      rank?: number;
+    }>;
+  }
+
   // API 응답을 페이지가 기대하는 형식으로 변환
-  return data.map((dept: any) => ({
+  return data.map((dept: DeptScore) => ({
     department: dept.department,
-    byType: dept.scores?.map((score: any) => ({
+    byType: dept.scores?.map((score) => ({
       evaluation_type: score.evaluationType,
       final_avg: score.finalScore,
       rank: score.rank || 1,
@@ -30,9 +39,18 @@ async function getAllDepartmentScores() {
 export default async function RankingPage() {
   const allScores = await getAllDepartmentScores();
 
+  interface DeptWithScores {
+    department: string;
+    byType: Array<{
+      evaluation_type: string;
+      final_avg: number;
+      rank: number;
+    }>;
+  }
+
   // 모든 부서의 상세 데이터 가져오기 (AI 분석용)
   const allDepartmentData = await Promise.all(
-    allScores.map(async (dept: any) => {
+    allScores.map(async (dept: DeptWithScores) => {
       const questionScores = await getDepartmentQuestionScores(dept.department as Department);
       const otherQuestionScores = await getOtherDeptQuestionScores(dept.department as Department);
 
@@ -49,8 +67,8 @@ export default async function RankingPage() {
   const evaluationTypes = ['조직문화', '업무충실', '업무협조', '업무혁신'];
 
   const rankingsByType = evaluationTypes.map((evalType) => {
-    const rankings = allScores.map((dept: any) => {
-      const typeScore = dept.byType.find((t: any) => t.evaluation_type === evalType);
+    const rankings = allScores.map((dept: DeptWithScores) => {
+      const typeScore = dept.byType.find((t) => t.evaluation_type === evalType);
       return {
         department: dept.department,
         score: typeScore?.final_avg || 0,
@@ -60,9 +78,15 @@ export default async function RankingPage() {
     return { type: evalType, data: rankings };
   });
 
+  interface OverallRanking {
+    department: string;
+    score: number;
+    rank?: number;
+  }
+
   // 종합 순위 (전체 평균)
-  const overallRankings = allScores.map((dept: any) => {
-    const totalScore = dept.byType.reduce((sum: number, type: any) => sum + type.final_avg, 0);
+  const overallRankings: OverallRanking[] = allScores.map((dept: DeptWithScores) => {
+    const totalScore = dept.byType.reduce((sum, type) => sum + type.final_avg, 0);
     const avgScore = totalScore / dept.byType.length;
     return {
       department: dept.department,
@@ -71,7 +95,7 @@ export default async function RankingPage() {
   });
 
   // 순위 매기기 (동점 처리)
-  overallRankings.sort((a: any, b: any) => b.score - a.score);
+  overallRankings.sort((a, b) => b.score - a.score);
   let currentRank = 1;
   for (let i = 0; i < overallRankings.length; i++) {
     // 이전 점수와 비교하여 동점이면 같은 순위, 아니면 현재 인덱스 + 1
@@ -112,7 +136,7 @@ export default async function RankingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {overallRankings.map((item: any, index: number) => (
+                {overallRankings.map((item: OverallRanking) => (
                   <tr
                     key={item.department}
                     className="hover:bg-blue-50/50 transition-colors group"
@@ -183,13 +207,13 @@ export default async function RankingPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">부서별 AI 종합 분석</h2>
           <div className="grid grid-cols-1 gap-6">
-            {allDepartmentData.map((deptData: any) => (
+            {allDepartmentData.map((deptData) => (
               <div key={deptData.department} className="bg-white rounded-lg shadow">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-4 rounded-t-lg">
                   <h3 className="text-xl font-bold">{deptData.department}</h3>
                 </div>
                 <div className="p-6">
-                  <AIAnalysis data={deptData} type="department" targetKey={deptData.department} />
+                  <AIAnalysis data={deptData as unknown as Parameters<typeof AIAnalysis>[0]['data']} type="department" targetKey={deptData.department} />
                 </div>
               </div>
             ))}

@@ -84,7 +84,7 @@ ${data.otherQuestions
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
@@ -118,15 +118,16 @@ interface ManagementAnalysisData {
     avg_score: number;
     response_count: number;
   }[];
-  textKeywords?: Map<number, { keyword: string; count: number }[]>;
+  textKeywords?: Record<number, { keyword: string; count: number }[]> | Map<number, { keyword: string; count: number }[]>;
 }
 
 export async function generateManagementAnalysis(data: ManagementAnalysisData): Promise<string> {
   // 키워드 데이터 포맷팅
   const keywordSection = data.textKeywords ? `
 [서술형 응답 키워드 분석]
-${Array.from(data.textKeywords.entries())
-  .map(([qNum, keywords]) => {
+${Object.entries(data.textKeywords)
+  .map(([qNumStr, keywords]) => {
+    const qNum = parseInt(qNumStr);
     const questionTitles: { [key: number]: string } = {
       40: 'Q40. 관리처 전반에서 업무협조가 어려운 이유',
       45: 'Q45. 타 부서와의 업무협조 개선 방안',
@@ -136,7 +137,7 @@ ${Array.from(data.textKeywords.entries())
       53: 'Q53. 관리처 발전을 위한 아이디어',
     };
     const title = questionTitles[qNum] || `Q${qNum}`;
-    const topKeywords = keywords.slice(0, 10).map(k => `${k.keyword}(${k.count}회)`).join(', ');
+    const topKeywords = keywords.slice(0, 10).map((k: { keyword: string; count: number }) => `${k.keyword}(${k.count}회)`).join(', ');
     return `${title}\n  → ${topKeywords}`;
   })
   .join('\n\n')}
@@ -186,7 +187,7 @@ ${keywordSection}
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4',
+      model: 'gpt-4o-mini',
       messages: [
         {
           role: 'system',
