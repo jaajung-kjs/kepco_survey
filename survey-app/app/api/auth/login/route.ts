@@ -38,6 +38,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 세션 생성 (쿠키에 user_id 저장)
+    const isProduction = process.env.NODE_ENV === 'production';
+    const maxAge = 60 * 60 * 24 * 7; // 7일
+
+    // Set-Cookie 헤더를 직접 생성
+    const userIdCookie = `user_id=${user.id}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${isProduction ? '; Secure' : ''}`;
+    const isAdminCookie = `is_admin=${user.is_admin}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${isProduction ? '; Secure' : ''}`;
+
     const response = NextResponse.json({
       success: true,
       user: {
@@ -46,26 +53,13 @@ export async function POST(request: NextRequest) {
         is_admin: user.is_admin,
         has_completed: user.has_completed,
       },
+    }, {
+      headers: {
+        'Set-Cookie': [userIdCookie, isAdminCookie].join(', '),
+      },
     });
 
-    // HttpOnly 쿠키로 세션 저장
-    response.cookies.set('user_id', user.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7일
-      path: '/', // 전체 경로에서 쿠키 사용 가능
-    });
-
-    // is_admin 정보도 쿠키에 저장 (middleware에서 사용)
-    response.cookies.set('is_admin', user.is_admin.toString(), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7일
-      path: '/', // 전체 경로에서 쿠키 사용 가능
-    });
-
+    console.log('[Login] Set cookies for user:', user.username);
     return response;
   } catch (error) {
     console.error('Login error:', error);
