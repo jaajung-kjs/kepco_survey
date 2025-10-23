@@ -1,14 +1,47 @@
-import { getCurrentUser } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import SurveyForm from '@/components/SurveyForm';
 import SurveyCompleted from '@/components/SurveyCompleted';
 
-export default async function SurveyPage() {
-  const user = await getCurrentUser();
+export default function SurveyPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
-  if (!user) {
-    redirect('/login');
+  useEffect(() => {
+    async function checkUser() {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
+      if (!authUser) {
+        router.push('/login');
+        return;
+      }
+
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_user_id', authUser.id)
+        .single();
+
+      setUser(userData);
+      setLoading(false);
+    }
+
+    checkUser();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">로딩 중...</div>
+      </div>
+    );
   }
+
+  if (!user) return null;
 
   if (user.has_completed) {
     return <SurveyCompleted completedAt={user.completed_at!} />;

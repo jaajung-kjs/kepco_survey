@@ -1,33 +1,61 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 import DepartmentRadarChartSmall from '@/components/DepartmentRadarChartSmall';
 import LogoutButton from '@/components/LogoutButton';
-import { getAdminStats } from '@/lib/api/stats';
-import { getAllDepartmentScores as fetchAllDepartmentScores } from '@/lib/api/scores';
-import { requireAdmin } from '@/lib/auth';
 
-async function getAllDepartmentScores() {
-  const data = await fetchAllDepartmentScores();
+export default function AdminDashboard() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [allScores, setAllScores] = useState<any[]>([]);
 
-  return data.map((dept) => ({
-    department: dept.department,
-    byType: dept.scores?.map((score) => ({
-      evaluation_type: score.evaluationType,
-      final_avg: score.finalScore,
-    })) || [],
-  }));
-}
+  useEffect(() => {
+    async function loadData() {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
 
-export default async function AdminDashboard() {
-  // 관리자 인증 체크 (User 페이지와 동일한 방식)
-  const user = await requireAdmin().catch(() => null);
+      if (!authUser) {
+        router.push('/login');
+        return;
+      }
 
-  if (!user) {
-    redirect('/login');
+      const { data: userData } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_user_id', authUser.id)
+        .single();
+
+      if (!userData?.is_admin) {
+        router.push('/login');
+        return;
+      }
+
+      // 통계 로드
+      const statsRes = await fetch('/api/admin/stats');
+      const statsData = await statsRes.json();
+      setStats(statsData);
+
+      // 점수 로드
+      const scoresRes = await fetch('/api/scores/department');
+      const scoresData = await scoresRes.json();
+      setAllScores(scoresData);
+
+      setLoading(false);
+    }
+
+    loadData();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">로딩 중...</div>
+      </div>
+    );
   }
-
-  const stats = await getAdminStats();
-  const allScores = await getAllDepartmentScores();
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -51,9 +79,7 @@ export default async function AdminDashboard() {
             </div>
             <div className="bg-purple-50 rounded-lg p-4">
               <div className="text-sm text-purple-600 font-medium">응답률</div>
-              <div className="text-3xl font-bold text-purple-900 mt-2">
-                {stats.overall.rate.toFixed(1)}%
-              </div>
+              <div className="text-3xl font-bold text-purple-900 mt-2">{stats.overall.rate.toFixed(1)}%</div>
             </div>
           </div>
         </div>
@@ -65,7 +91,7 @@ export default async function AdminDashboard() {
             className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
           >
             <h3 className="text-lg font-semibold text-gray-900 mb-2">관리처 전반 분석</h3>
-            <p className="text-gray-600 text-sm">관리처 전체에 대한 평가 및 서술형 응답 분석</p>
+            <p className="text-gray-600 text-sm">관리처 설문 결과 종합 분석</p>
           </Link>
 
           <Link
@@ -82,19 +108,55 @@ export default async function AdminDashboard() {
         {/* 부서별 레이더 차트 */}
         <div className="bg-white rounded-lg shadow p-6 mb-8">
           <h2 className="text-xl font-semibold mb-6">부서별 평가 현황</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {allScores.map((dept: { department: string; byType: Array<{ evaluation_type: string; final_avg: number }> }) => (
-              <Link
-                key={dept.department}
-                href={`/admin/department/${encodeURIComponent(dept.department)}`}
-                className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg hover:border-blue-400 transition-all cursor-pointer"
-              >
-                <DepartmentRadarChartSmall
-                  data={dept.byType}
-                  department={dept.department}
-                />
-              </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allScores.map((score: any) => (
+              <DepartmentRadarChartSmall
+                key={score.department}
+                department={score.department}
+                scores={score.scores}
+              />
             ))}
+          </div>
+        </div>
+
+        {/* 부서별 응답 현황 테이블 */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">부서별 응답 현황</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">부서</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">전체</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">완료</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">응답률</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상세</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {stats.byDepartment.map((dept: any) => (
+                  <tr key={dept.department}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {dept.department}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {dept.total}명
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {dept.completed}명
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {dept.rate.toFixed(1)}%
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                      <Link href={`/admin/department/${dept.department}`}>
+                        상세 분석 →
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
