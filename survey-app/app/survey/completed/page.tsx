@@ -1,24 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { handleLogout } from '@/lib/logout';
 
 export default function SurveyCompletedPage() {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        router.push('/login');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-      router.push('/login');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center px-4">

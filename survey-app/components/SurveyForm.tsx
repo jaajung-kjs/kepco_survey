@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 import DepartmentPositionSelect from './DepartmentPositionSelect';
 import OwnDeptSurvey from './OwnDeptSurvey';
 import OtherDeptEvaluation from './OtherDeptEvaluation';
@@ -126,10 +127,17 @@ export default function SurveyForm() {
     setSubmitError('');
 
     try {
+      // Get session token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No session found. Please login again.');
+      }
+
       const response = await fetch('/api/survey/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           department,

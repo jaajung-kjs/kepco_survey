@@ -7,25 +7,23 @@ const openai = new OpenAI({
 interface DepartmentAnalysisData {
   department: string;
   byType: {
-    evaluation_type: string;
-    own_avg: number;
-    other_avg: number;
-    final_avg: number;
+    evaluationType: string;
+    ownScore: number;
+    otherScore: number;
+    finalScore: number;
     rank: number;
   }[];
   questions: {
     questionNumber: number;
     questionText: string;
-    average: number;
-    rank: number | null;
-    overallAverage: number;
+    avgScore: number;
+    rank: number;
   }[];
   otherQuestions: {
     questionNumber: number;
     questionText: string;
-    average: number;
-    rank: number | null;
-    overallAverage: number;
+    avgScore: number;
+    rank: number;
   }[];
 }
 
@@ -35,29 +33,29 @@ export async function generateDepartmentAnalysis(data: DepartmentAnalysisData): 
 
 [평가유형별 최종 점수 및 순위]
 ${data.byType.map(type => {
-  const diff = type.final_avg - type.own_avg;
-  const diffText = type.other_avg > 0 ? ` (타부서 평가 반영 ${diff > 0 ? '+' : ''}${diff.toFixed(2)})` : '';
-  return `- ${type.evaluation_type}: 본인평가 ${type.own_avg.toFixed(2)}점 → 최종 ${type.final_avg.toFixed(2)}점${diffText} | **${type.rank}위**`;
+  const diff = type.finalScore - type.ownScore;
+  const diffText = type.otherScore > 0 ? ` (타부서 평가 반영 ${diff > 0 ? '+' : ''}${diff.toFixed(2)})` : '';
+  return `- ${type.evaluationType}: 본인평가 ${type.ownScore.toFixed(2)}점 → 최종 ${type.finalScore.toFixed(2)}점${diffText} | **${type.rank}위**`;
 }).join('\n')}
 
 [본인 평가 문항별 점수 - 상위 5개]
 ${data.questions
-  .sort((a, b) => b.average - a.average)
+  .sort((a, b) => b.avgScore - a.avgScore)
   .slice(0, 5)
-  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.average.toFixed(2)}점 (전체 평균 ${q.overallAverage.toFixed(2)}점, ${q.rank ? `${q.rank}위` : '순위 없음'})`)
+  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위)`)
   .join('\n')}
 
 [본인 평가 문항별 점수 - 하위 5개]
 ${data.questions
-  .sort((a, b) => a.average - b.average)
+  .sort((a, b) => a.avgScore - b.avgScore)
   .slice(0, 5)
-  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.average.toFixed(2)}점 (전체 평균 ${q.overallAverage.toFixed(2)}점, ${q.rank ? `${q.rank}위` : '순위 없음'})`)
+  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위)`)
   .join('\n')}
 
 ${data.otherQuestions && data.otherQuestions.length > 0 ? `
 [타부서 평가 문항별 점수 (간부에 의한 평가)]
 ${data.otherQuestions
-  .map(q => `- ${q.questionText}: ${q.average.toFixed(2)}점 (전체 평균 ${q.overallAverage.toFixed(2)}점, ${q.rank ? `${q.rank}위` : '순위 없음'})`)
+  .map(q => `- ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위)`)
   .join('\n')}
 ` : ''}
 
@@ -108,15 +106,13 @@ ${data.otherQuestions
 
 interface ManagementAnalysisData {
   byType: {
-    evaluation_type: string;
-    avg_score: number;
+    evaluationType: string;
+    average: number;
   }[];
-  questions: {
-    question_number: number;
-    question_text: string;
-    evaluation_type: string;
-    avg_score: number;
-    response_count: number;
+  questionScores: {
+    questionNumber: number;
+    questionText: string;
+    avgScore: number;
   }[];
   textKeywords?: Record<number, { keyword: string; count: number }[]> | Map<number, { keyword: string; count: number }[]>;
 }
@@ -147,22 +143,22 @@ ${Object.entries(data.textKeywords)
 다음은 관리처 전반에 대한 조직 평가 결과입니다. 이 데이터를 분석하여 종합 평가를 작성해주세요.
 
 [평가유형별 평균 점수]
-${data.byType.map(type => `- ${type.evaluation_type}: ${type.avg_score.toFixed(2)}점`).join('\n')}
+${data.byType.map(type => `- ${type.evaluationType}: ${type.average.toFixed(2)}점`).join('\n')}
 
 [세부 문항별 점수 - 상위 5개]
-${data.questions
-  .filter(q => q.avg_score > 0)
-  .sort((a, b) => b.avg_score - a.avg_score)
+${data.questionScores
+  .filter(q => q.avgScore > 0)
+  .sort((a, b) => b.avgScore - a.avgScore)
   .slice(0, 5)
-  .map(q => `- Q${q.question_number}. ${q.question_text}: ${q.avg_score.toFixed(2)}점 (${q.evaluation_type})`)
+  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점`)
   .join('\n')}
 
 [세부 문항별 점수 - 하위 5개]
-${data.questions
-  .filter(q => q.avg_score > 0)
-  .sort((a, b) => a.avg_score - b.avg_score)
+${data.questionScores
+  .filter(q => q.avgScore > 0)
+  .sort((a, b) => a.avgScore - b.avgScore)
   .slice(0, 5)
-  .map(q => `- Q${q.question_number}. ${q.question_text}: ${q.avg_score.toFixed(2)}점 (${q.evaluation_type})`)
+  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점`)
   .join('\n')}
 ${keywordSection}
 

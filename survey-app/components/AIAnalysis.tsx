@@ -3,22 +3,8 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-interface QuestionScore {
-  questionNumber: number;
-  questionText: string;
-  average: number;
-  rank: number | null;
-  overallAverage: number;
-}
-
 interface AIAnalysisProps {
-  data: {
-    byType: Array<{ evaluation_type: string; final_avg?: number; avg_score?: number; own_avg?: number; other_avg?: number; rank?: number | null }>;
-    questions?: QuestionScore[] | Array<{ question_number: number; question_text: string; avg_score: number; evaluation_type: string; response_count: number }>;
-    textResponses?: Array<{ question_number: number; question_text: string; response_text: string }>;
-    department?: string;
-    otherQuestions?: QuestionScore[];
-  };
+  data: any;
   type: 'department' | 'management';
   targetKey?: string; // department name for department analysis
 }

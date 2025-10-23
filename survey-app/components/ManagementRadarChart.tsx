@@ -4,15 +4,15 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 
 interface ManagementRadarChartProps {
   data: {
-    evaluation_type: string;
-    avg_score: number;
+    evaluationType: string;
+    average: number;
   }[];
 }
 
 export default function ManagementRadarChart({ data }: ManagementRadarChartProps) {
   const chartData = data.map(item => ({
-    subject: item.evaluation_type,
-    평균점수: parseFloat(item.avg_score.toFixed(2)),
+    subject: item.evaluationType,
+    평균점수: parseFloat((item.average || 0).toFixed(2)),
   }));
 
   return (

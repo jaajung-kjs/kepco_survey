@@ -41,7 +41,23 @@ export default function AdminDashboard() {
       // 점수 로드
       const scoresRes = await fetch('/api/scores/department');
       const scoresData = await scoresRes.json();
-      setAllScores(scoresData);
+
+      // 부서 순서 정의
+      const departmentOrder = [
+        '지역협력부', '계통운영부', '송전운영부', '변전운영부', '전자제어부',
+        '토건운영부', '강릉전력', '동해전력', '원주전력', '태백전력'
+      ];
+
+      // 부서 순서대로 정렬
+      const sortedScores = Array.isArray(scoresData)
+        ? scoresData.sort((a, b) => {
+            const indexA = departmentOrder.indexOf(a.department);
+            const indexB = departmentOrder.indexOf(b.department);
+            return indexA - indexB;
+          })
+        : [];
+
+      setAllScores(sortedScores);
 
       setLoading(false);
     }
@@ -113,50 +129,9 @@ export default function AdminDashboard() {
               <DepartmentRadarChartSmall
                 key={score.department}
                 department={score.department}
-                scores={score.scores}
+                data={score.scores}
               />
             ))}
-          </div>
-        </div>
-
-        {/* 부서별 응답 현황 테이블 */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">부서별 응답 현황</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">부서</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">전체</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">완료</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">응답률</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상세</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {stats.byDepartment.map((dept: any) => (
-                  <tr key={dept.department}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {dept.department}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {dept.total}명
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {dept.completed}명
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {dept.rate.toFixed(1)}%
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
-                      <Link href={`/admin/department/${dept.department}`}>
-                        상세 분석 →
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       </div>

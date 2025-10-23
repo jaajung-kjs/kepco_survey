@@ -1,23 +1,24 @@
 'use client';
 
+import Link from 'next/link';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts';
 
 interface DepartmentRadarChartSmallProps {
   data: Array<{
-    evaluation_type: string;
-    final_avg: number;
+    evaluationType: string;
+    finalScore: number;
   }>;
   department: string;
 }
 
 export default function DepartmentRadarChartSmall({ data, department }: DepartmentRadarChartSmallProps) {
   const chartData = data.map(item => ({
-    subject: item.evaluation_type,
-    score: item.final_avg,
+    subject: item.evaluationType,
+    score: item.finalScore || 0,
   }));
 
   return (
-    <div className="w-full h-full">
+    <Link href={`/admin/department/${encodeURIComponent(department)}`} className="block w-full h-full cursor-pointer hover:shadow-lg transition-shadow rounded-lg border border-gray-200 p-4 bg-white">
       <h3 className="text-center font-semibold text-gray-800 mb-2">{department}</h3>
       <ResponsiveContainer width="100%" height={200}>
         <RadarChart data={chartData}>
@@ -34,6 +35,6 @@ export default function DepartmentRadarChartSmall({ data, department }: Departme
           />
         </RadarChart>
       </ResponsiveContainer>
-    </div>
+    </Link>
   );
 }

@@ -4,18 +4,18 @@ import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Responsi
 
 interface DepartmentRadarChartProps {
   data: {
-    evaluation_type: string;
-    own_avg: number;
-    final_avg: number;
+    evaluationType: string;
+    ownScore: number;
+    finalScore: number;
     rank: number;
   }[];
 }
 
 export default function DepartmentRadarChart({ data }: DepartmentRadarChartProps) {
   const chartData = data.map(item => ({
-    subject: item.evaluation_type,
-    본인평가: parseFloat(item.own_avg.toFixed(2)),
-    최종점수: parseFloat(item.final_avg.toFixed(2)),
+    subject: item.evaluationType,
+    본인평가: parseFloat((item.ownScore || 0).toFixed(2)),
+    최종점수: parseFloat((item.finalScore || 0).toFixed(2)),
   }));
 
   return (
