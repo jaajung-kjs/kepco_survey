@@ -1,4 +1,4 @@
-import { createServerSupabaseClient } from './supabase';
+import { createClient } from './supabase';
 import { DEPARTMENTS, EVALUATION_TYPES, type Department, type EvaluationType } from './constants';
 
 // 문항 번호와 평가유형 매핑
@@ -65,7 +65,7 @@ export interface ManagementScore {
  * @returns 부서별 종합 점수
  */
 export async function calculateDepartmentScores(department: Department): Promise<DepartmentScore> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
 
   // 1. 부서 데이터 조회
   const { data: deptData, error: deptError } = await supabase
@@ -237,7 +237,7 @@ export async function calculateAllDepartmentScores(): Promise<DepartmentScore[]>
  * @returns 관리처 평가유형별 점수
  */
 export async function calculateManagementScores(): Promise<ManagementScore[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
 
   // 1. 관리처 데이터 조회
   const { data: mgmtData, error: mgmtError} = await supabase
@@ -307,7 +307,7 @@ export async function calculateManagementScores(): Promise<ManagementScore[]> {
  * @returns 문항별 점수 배열
  */
 export async function getDepartmentQuestionScores(department: Department): Promise<QuestionScore[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
 
   const { data: deptData, error } = await supabase
     .from('department_scores')
@@ -404,7 +404,7 @@ export async function getDepartmentQuestionScores(department: Department): Promi
  * @returns 타부서 평가 문항별 점수 배열
  */
 export async function getOtherDeptQuestionScores(department: Department): Promise<QuestionScore[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
 
   const { data: deptData, error } = await supabase
     .from('department_scores')
@@ -498,7 +498,7 @@ export async function getOtherDeptQuestionScores(department: Department): Promis
  * @returns 서술형 응답 배열
  */
 export async function getTextResponses(questionNumbers: number[]): Promise<Array<{ question_number: number; question_text: string; response_text: string }>> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
 
   const { data, error } = await supabase
     .from('text_responses')

@@ -1,8 +1,8 @@
-import { createServerSupabaseClient } from './supabase';
+import { createClient } from './supabase';
 import type { SurveyQuestion } from '@/types';
 
 export async function getSurveyQuestions(): Promise<SurveyQuestion[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('survey_questions')
     .select('*')
@@ -17,7 +17,7 @@ export async function getSurveyQuestions(): Promise<SurveyQuestion[]> {
 }
 
 export async function getOwnDeptQuestions(): Promise<SurveyQuestion[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('survey_questions')
     .select('*')
@@ -33,7 +33,7 @@ export async function getOwnDeptQuestions(): Promise<SurveyQuestion[]> {
 }
 
 export async function getOtherDeptQuestions(): Promise<SurveyQuestion[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('survey_questions')
     .select('*')
@@ -50,7 +50,7 @@ export async function getOtherDeptQuestions(): Promise<SurveyQuestion[]> {
 }
 
 export async function getManagementQuestions(): Promise<SurveyQuestion[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('survey_questions')
     .select('*')
@@ -66,7 +66,7 @@ export async function getManagementQuestions(): Promise<SurveyQuestion[]> {
 }
 
 export async function getGeneralOpinionQuestions(): Promise<SurveyQuestion[]> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from('survey_questions')
     .select('*')

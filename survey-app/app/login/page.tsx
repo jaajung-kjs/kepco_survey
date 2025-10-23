@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,29 +17,41 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+      const supabase = createClient();
+      const email = `${username}@survey.local`;
+
+      // Supabase Auth 로그인
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || '로그인에 실패했습니다.');
+      if (authError || !authData.user) {
+        setError('아이디 또는 비밀번호가 올바르지 않습니다.');
         setLoading(false);
         return;
       }
 
-      // 로그인 성공
-      if (data.user.is_admin) {
-        router.push('/admin/dashboard');
-      } else if (data.user.has_completed) {
-        setError('이미 설문을 완료하셨습니다.');
+      // users 테이블에서 사용자 정보 조회
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('auth_user_id', authData.user.id)
+        .single();
+
+      if (userError || !user) {
+        setError('사용자 정보를 찾을 수 없습니다.');
         setLoading(false);
+        return;
+      }
+
+      // 로그인 성공 - 페이지 이동
+      if (user.is_admin) {
+        router.push('/admin/dashboard');
       } else {
         router.push('/survey');
       }
+      router.refresh();
     } catch {
       setError('로그인 중 오류가 발생했습니다.');
       setLoading(false);

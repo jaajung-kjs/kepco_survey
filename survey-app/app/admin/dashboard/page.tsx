@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import DepartmentRadarChartSmall from '@/components/DepartmentRadarChartSmall';
+import LogoutButton from '@/components/LogoutButton';
 import { getAdminStats } from '@/lib/api/stats';
 import { getAllDepartmentScores as fetchAllDepartmentScores } from '@/lib/api/scores';
 import { requireAdmin } from '@/lib/auth';
@@ -75,13 +76,7 @@ export default async function AdminDashboard() {
             <p className="text-gray-600 text-sm">부서별 종합 순위 및 평가유형별 순위</p>
           </Link>
 
-          <Link
-            href="/api/auth/logout"
-            className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow"
-          >
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">로그아웃</h3>
-            <p className="text-gray-600 text-sm">관리자 세션 종료</p>
-          </Link>
+          <LogoutButton />
         </div>
 
         {/* 부서별 레이더 차트 */}

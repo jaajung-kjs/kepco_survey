@@ -1,28 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { handleLogout } from '@/lib/logout';
 
 interface Props {
   completedAt: string;
 }
 
 export default function SurveyCompleted({ completedAt }: Props) {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-      });
-
-      if (response.ok) {
-        router.push('/login');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-      router.push('/login');
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

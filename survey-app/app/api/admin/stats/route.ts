@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase';
 
 export async function GET() {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
 
   try {
     // 전체 사용자 수 및 응답 완료 수

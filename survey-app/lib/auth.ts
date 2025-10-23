@@ -1,15 +1,12 @@
-import { createServerSupabaseClient } from './supabase';
+import { createClient } from './supabase';
 import { User } from '@/types';
 
 export async function getCurrentUser(): Promise<User | null> {
-  const supabase = await createServerSupabaseClient();
+  const supabase = createClient();
 
-  // Supabase Auth 세션 확인
   const { data: { user: authUser } } = await supabase.auth.getUser();
-
   if (!authUser) return null;
 
-  // users 테이블에서 메타데이터 조회
   const { data: user } = await supabase
     .from('users')
     .select('*')
