@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         const { error } = await supabase
           .from('text_responses')
           .insert({
-            user_id: user.id,
+            auth_user_id: user.auth_user_id,
             question_number: parseInt(questionNumber),
             question_text: questionData.question_text,
             response_text: response.trim(),
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     const { error: updateError } = await supabase
       .from('users')
       .update({ has_completed: true })
-      .eq('id', user.id);
+      .eq('auth_user_id', user.auth_user_id);
 
     if (updateError) {
       console.error('Error updating user completion status:', updateError);

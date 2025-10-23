@@ -175,7 +175,6 @@ export async function calculateDepartmentScores(department: Department): Promise
  * @returns 전체 부서별 점수 배열
  */
 export async function calculateAllDepartmentScores(): Promise<DepartmentScore[]> {
-  const supabase = await createServerSupabaseClient();
   const departmentScores: DepartmentScore[] = [];
 
   // 1. 각 부서별 점수 계산
