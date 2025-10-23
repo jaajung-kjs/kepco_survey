@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import DepartmentRadarChart from '@/components/DepartmentRadarChart';
 import AIAnalysis from '@/components/AIAnalysis';
 import { getDepartmentQuestionScores, getOtherDeptQuestionScores } from '@/lib/scoreCalculator';
 import { Department } from '@/lib/constants';
 import { getAllDepartmentScores as fetchAllDepartmentScores } from '@/lib/api/scores';
+import { requireAdmin } from '@/lib/auth';
 
 async function getDepartmentScores(department: string) {
   // 전체 부서 점수를 조회하여 순위가 포함된 데이터 사용
@@ -40,6 +42,13 @@ export default async function DepartmentAnalysisPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // 관리자 인증 체크 (User 페이지와 동일한 방식)
+  const user = await requireAdmin().catch(() => null);
+
+  if (!user) {
+    redirect('/login');
+  }
+
   const { id } = await params;
   const department = decodeURIComponent(id);
   const data = await getDepartmentScores(department);

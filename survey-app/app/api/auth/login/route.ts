@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7일
+      path: '/', // 전체 경로에서 쿠키 사용 가능
     });
 
     // is_admin 정보도 쿠키에 저장 (middleware에서 사용)
@@ -62,6 +63,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7일
+      path: '/', // 전체 경로에서 쿠키 사용 가능
     });
 
     return response;

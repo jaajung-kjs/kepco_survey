@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import ManagementRadarChart from '@/components/ManagementRadarChart';
 import TextResponseWordCloud from '@/components/TextResponseWordCloud';
 import AIAnalysis from '@/components/AIAnalysis';
 import { extractKeywordsByQuestions } from '@/lib/textAnalysis';
 import { getManagementScores as fetchManagementScores } from '@/lib/api/scores';
+import { requireAdmin } from '@/lib/auth';
 
 async function getManagementScoresData() {
   const data = await fetchManagementScores();
@@ -48,6 +50,13 @@ async function getManagementScoresData() {
 }
 
 export default async function ManagementAnalysisPage() {
+  // 관리자 인증 체크 (User 페이지와 동일한 방식)
+  const user = await requireAdmin().catch(() => null);
+
+  if (!user) {
+    redirect('/login');
+  }
+
   const data = await getManagementScoresData();
 
   // 서술형 문항 목록

@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import DepartmentRadarChartSmall from '@/components/DepartmentRadarChartSmall';
 import { getAdminStats } from '@/lib/api/stats';
 import { getAllDepartmentScores as fetchAllDepartmentScores } from '@/lib/api/scores';
+import { requireAdmin } from '@/lib/auth';
 
 async function getAllDepartmentScores() {
   const data = await fetchAllDepartmentScores();
@@ -16,6 +18,13 @@ async function getAllDepartmentScores() {
 }
 
 export default async function AdminDashboard() {
+  // 관리자 인증 체크 (User 페이지와 동일한 방식)
+  const user = await requireAdmin().catch(() => null);
+
+  if (!user) {
+    redirect('/login');
+  }
+
   const stats = await getAdminStats();
   const allScores = await getAllDepartmentScores();
 

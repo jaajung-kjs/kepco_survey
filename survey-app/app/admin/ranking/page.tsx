@@ -1,9 +1,11 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import RankingBarChart from '@/components/RankingBarChart';
 import AIAnalysis from '@/components/AIAnalysis';
 import { getDepartmentQuestionScores, getOtherDeptQuestionScores } from '@/lib/scoreCalculator';
 import { Department } from '@/lib/constants';
 import { getAllDepartmentScores as fetchAllDepartmentScores } from '@/lib/api/scores';
+import { requireAdmin } from '@/lib/auth';
 
 async function getAllDepartmentScores() {
   const data = await fetchAllDepartmentScores();
@@ -20,6 +22,13 @@ async function getAllDepartmentScores() {
 }
 
 export default async function RankingPage() {
+  // 관리자 인증 체크 (User 페이지와 동일한 방식)
+  const user = await requireAdmin().catch(() => null);
+
+  if (!user) {
+    redirect('/login');
+  }
+
   const allScores = await getAllDepartmentScores();
 
   interface DeptWithScores {
