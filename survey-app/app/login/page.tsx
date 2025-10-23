@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -10,21 +10,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 컴포넌트 마운트 시 강제 로그아웃 (쿠키 정리)
-  useEffect(() => {
-    const forceLogout = async () => {
-      try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          cache: 'no-store',
-        });
-      } catch (error) {
-        console.error('Logout error:', error);
-      }
-    };
-    forceLogout();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -33,9 +18,7 @@ export default function LoginPage() {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
 
@@ -76,9 +59,6 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
-              <label htmlFor="username" className="sr-only">
-                아이디
-              </label>
               <input
                 id="username"
                 name="username"
@@ -92,9 +72,6 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="sr-only">
-                비밀번호
-              </label>
               <input
                 id="password"
                 name="password"
@@ -111,11 +88,7 @@ export default function LoginPage() {
 
           {error && (
             <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
-                </div>
-              </div>
+              <div className="text-sm font-medium text-red-800">{error}</div>
             </div>
           )}
 

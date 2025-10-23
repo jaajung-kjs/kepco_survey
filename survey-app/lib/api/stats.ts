@@ -1,6 +1,8 @@
-import { supabase } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase';
 
 export async function getAdminStats() {
+  const supabase = await createServerSupabaseClient();
+
   try {
     // 전체 사용자 수 및 응답 완료 수
     const { data: users, error: usersError } = await supabase

@@ -2,7 +2,7 @@ import { Department, Position, EvaluationType, ResponseType, SurveySection } fro
 
 // 사용자
 export interface User {
-  id: string;
+  auth_user_id: string;
   username: string;
   is_admin: boolean;
   has_completed: boolean;

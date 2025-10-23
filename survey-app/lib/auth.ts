@@ -1,54 +1,32 @@
-import { cookies } from 'next/headers';
-import { supabase } from './supabase';
+import { createServerSupabaseClient } from './supabase';
 import { User } from '@/types';
 
 export async function getCurrentUser(): Promise<User | null> {
-  try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('user_id')?.value;
+  const supabase = await createServerSupabaseClient();
 
-    if (!userId) {
-      console.log('[Auth] No user_id cookie found');
-      return null;
-    }
+  // Supabase Auth 세션 확인
+  const { data: { user: authUser } } = await supabase.auth.getUser();
 
-    console.log('[Auth] Found user_id:', userId);
+  if (!authUser) return null;
 
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+  // users 테이블에서 메타데이터 조회
+  const { data: user } = await supabase
+    .from('users')
+    .select('*')
+    .eq('auth_user_id', authUser.id)
+    .single();
 
-    if (error || !user) {
-      console.log('[Auth] User lookup failed:', error);
-      return null;
-    }
-
-    console.log('[Auth] User found:', user.username);
-    return user as User;
-  } catch (error) {
-    console.error('[Auth] Error in getCurrentUser:', error);
-    return null;
-  }
+  return user as User | null;
 }
 
 export async function requireAuth(): Promise<User> {
   const user = await getCurrentUser();
-
-  if (!user) {
-    throw new Error('Unauthorized');
-  }
-
+  if (!user) throw new Error('Unauthorized');
   return user;
 }
 
 export async function requireAdmin(): Promise<User> {
   const user = await requireAuth();
-
-  if (!user.is_admin) {
-    throw new Error('Forbidden: Admin access required');
-  }
-
+  if (!user.is_admin) throw new Error('Forbidden');
   return user;
 }

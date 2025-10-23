@@ -1,19 +1,8 @@
-/**
- * 사용자 계정 생성 스크립트
- *
- * 사용법:
- * npm run create-users
- *
- * 또는 특정 사용자만 생성:
- * npx tsx scripts/create-users.ts <username> <password> [is_admin]
- */
-
 import { createClient } from '@supabase/supabase-js';
-import bcrypt from 'bcrypt';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// .env.local 파일 읽기
+// .env.local 파일 로드
 const envPath = path.resolve(__dirname, '../.env.local');
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf-8');
@@ -33,101 +22,78 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Error: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env.local');
+  console.error('환경 변수가 설정되지 않았습니다.');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Admin API 사용을 위한 Service Role Key
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+  },
+});
 
-async function createUser(username: string, password: string, isAdmin: boolean = false) {
-  try {
-    // 비밀번호 해시화
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+async function createUsers() {
+  console.log('🚀 Supabase Auth 계정 생성 시작...\n');
 
-    // 사용자 생성
-    const { data, error } = await supabase
-      .from('users')
-      .insert({
-        username,
-        password_hash: passwordHash,
-        is_admin: isAdmin,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === '23505') {
-        console.error(`✗ 사용자 '${username}'는 이미 존재합니다.`);
-      } else {
-        console.error(`✗ 사용자 '${username}' 생성 실패:`, error.message);
-      }
-      return false;
-    }
-
-    console.log(`✓ 사용자 '${username}' 생성 완료 (관리자: ${isAdmin ? '예' : '아니오'})`);
-    return true;
-  } catch (error) {
-    console.error(`✗ 사용자 '${username}' 생성 중 오류:`, error);
-    return false;
-  }
-}
-
-async function createDefaultUsers() {
-  console.log('기본 사용자 계정 생성 중...\n');
-
-  // 관리자 계정
-  await createUser('admin', 'admin1234', true);
-
-  // 부서별 테스트 계정 (직원)
-  const departments = [
-    '지역협력부',
-    '계통운영부',
-    '송전운영부',
-    '변전운영부',
-    '전자제어부',
-    '토건운영부',
-    '강릉전력',
-    '동해전력',
-    '원주전력',
-    '태백전력',
+  const users = [
+    ...Array.from({ length: 10 }, (_, i) => ({
+      username: `user${String(i + 1).padStart(2, '0')}`,
+      password: 'pass1234',
+      is_admin: false,
+    })),
+    {
+      username: 'admin',
+      password: 'admin1234',
+      is_admin: true,
+    },
   ];
 
-  for (const dept of departments) {
-    const username = `${dept}_직원`;
-    await createUser(username, 'test1234', false);
+  for (const userData of users) {
+    try {
+      const email = `${userData.username}@survey.local`;
+
+      // 1. Supabase Auth 계정 생성
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email,
+        password: userData.password,
+        email_confirm: true,
+      });
+
+      if (authError) {
+        console.error(`❌ ${userData.username} 생성 실패:`, authError.message);
+        continue;
+      }
+
+      // 2. users 테이블에 메타데이터 저장
+      const { error: insertError } = await supabase.from('users').insert({
+        auth_user_id: authData.user.id,
+        username: userData.username,
+        is_admin: userData.is_admin,
+        has_completed: false,
+      });
+
+      if (insertError) {
+        console.error(`❌ ${userData.username} 메타데이터 저장 실패:`, insertError.message);
+        continue;
+      }
+
+      console.log(`✅ ${userData.username} - ${userData.is_admin ? '관리자' : '일반'}`);
+    } catch (error) {
+      console.error(`❌ ${userData.username} 오류:`, error);
+    }
   }
 
-  // 간부 테스트 계정 (5개)
-  for (let i = 1; i <= 5; i++) {
-    const username = `간부${i}`;
-    await createUser(username, 'test1234', false);
-  }
-
-  console.log('\n기본 사용자 계정 생성 완료!');
-  console.log('\n생성된 계정:');
-  console.log('- 관리자: admin / admin1234');
-  console.log('- 직원: {부서명}_직원 / test1234 (10개)');
-  console.log('- 간부: 간부1~간부5 / test1234 (5개)');
+  console.log('\n✨ 완료!');
+  console.log('\n📋 로그인 정보:');
+  console.log('일반: user01 ~ user10 / pass1234');
+  console.log('관리자: admin / admin1234');
 }
 
-async function main() {
-  const args = process.argv.slice(2);
-
-  if (args.length === 0) {
-    // 기본 사용자 생성
-    await createDefaultUsers();
-  } else if (args.length >= 2) {
-    // 특정 사용자 생성
-    const [username, password, isAdmin] = args;
-    await createUser(username, password, isAdmin === 'true' || isAdmin === '1');
-  } else {
-    console.log('사용법:');
-    console.log('  npx tsx scripts/create-users.ts                          # 기본 계정 생성');
-    console.log('  npx tsx scripts/create-users.ts <username> <password>    # 일반 사용자 생성');
-    console.log('  npx tsx scripts/create-users.ts <username> <password> 1  # 관리자 생성');
+createUsers()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error('오류:', error);
     process.exit(1);
-  }
-}
-
-main();
+  });
