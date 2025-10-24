@@ -61,7 +61,95 @@ export async function POST(request: NextRequest) {
 
     const data: SubmitData = await request.json();
 
-    // 먼저 완료 플래그 업데이트 (빠른 응답을 위해)
+    // 1. Update department scores (본인 소속 조직)
+    for (const [questionNumber, score] of Object.entries(data.ownDeptAnswers)) {
+      const { error } = await supabase.rpc('increment_dept_score', {
+        dept: data.department,
+        question: `q${questionNumber}`,
+        score: score
+      });
+
+      if (error) {
+        console.error('Error updating department score:', error);
+        throw error;
+      }
+    }
+
+    // 2. Update other department scores (간부만)
+    if (data.otherDeptAnswers && data.position === '간부') {
+      for (const [questionNumber, deptScores] of Object.entries(data.otherDeptAnswers)) {
+        const mappedQuestionNum = parseInt(questionNumber) - 20;
+        for (const [department, score] of Object.entries(deptScores)) {
+          const { error } = await supabase.rpc('increment_other_score', {
+            dept: department,
+            question: `q${mappedQuestionNum}`,
+            score: score
+          });
+
+          if (error) {
+            console.error('Error updating other department score:', error);
+            throw error;
+          }
+        }
+      }
+    }
+
+    // 3. Update management scores (5점척도)
+    for (const [questionNumber, score] of Object.entries(data.managementScaleAnswers)) {
+      const { error } = await supabase.rpc('increment_management_score', {
+        question: `q${questionNumber}`,
+        score: score
+      });
+
+      if (error) {
+        console.error('Error updating management score:', error);
+        throw error;
+      }
+    }
+
+    // 4. Save text responses (관리처 서술형 + 종합 의견)
+    const allTextResponses = {
+      ...data.managementTextAnswers,
+      ...data.opinionAnswers
+    };
+
+    for (const [questionNumber, response] of Object.entries(allTextResponses)) {
+      if (response && response.trim()) {
+        const { data: questionData, error: questionError } = await supabase
+          .from('survey_questions')
+          .select('question_text')
+          .eq('question_number', parseInt(questionNumber))
+          .maybeSingle();
+
+        if (questionError) {
+          console.error('Error fetching question text:', questionError);
+          throw questionError;
+        }
+
+        if (!questionData || !questionData.question_text) {
+          const errorMsg = `Question ${questionNumber} not found in survey_questions`;
+          console.error(errorMsg);
+          throw new Error(errorMsg);
+        }
+
+        const { error } = await supabase
+          .from('text_responses')
+          .insert({
+            auth_user_id: user.auth_user_id,
+            question_number: parseInt(questionNumber),
+            question_text: questionData.question_text,
+            response_text: response.trim(),
+            respondent_department: data.department
+          });
+
+        if (error) {
+          console.error('Error saving text response:', error);
+          throw error;
+        }
+      }
+    }
+
+    // 5. 모든 저장이 완료된 후 완료 플래그 업데이트
     const { error: updateError } = await supabase
       .from('users')
       .update({ has_completed: true })
@@ -71,96 +159,6 @@ export async function POST(request: NextRequest) {
       console.error('Error updating user completion status:', updateError);
       throw updateError;
     }
-
-    // 점수 업데이트는 백그라운드에서 처리 (await 없이)
-    (async () => {
-      try {
-        // 1. Update department scores (본인 소속 조직)
-        for (const [questionNumber, score] of Object.entries(data.ownDeptAnswers)) {
-          const { error } = await supabase.rpc('increment_dept_score', {
-            dept: data.department,
-            question: `q${questionNumber}`,
-            score: score
-          });
-
-          if (error) {
-            console.error('Error updating department score:', error);
-          }
-        }
-
-        // 2. Update other department scores (간부만)
-        if (data.otherDeptAnswers && data.position === '간부') {
-          for (const [questionNumber, deptScores] of Object.entries(data.otherDeptAnswers)) {
-            const mappedQuestionNum = parseInt(questionNumber) - 20;
-            for (const [department, score] of Object.entries(deptScores)) {
-              const { error } = await supabase.rpc('increment_other_score', {
-                dept: department,
-                question: `q${mappedQuestionNum}`,
-                score: score
-              });
-
-              if (error) {
-                console.error('Error updating other department score:', error);
-              }
-            }
-          }
-        }
-
-        // 3. Update management scores (5점척도)
-        for (const [questionNumber, score] of Object.entries(data.managementScaleAnswers)) {
-          const { error } = await supabase.rpc('increment_management_score', {
-            question: `q${questionNumber}`,
-            score: score
-          });
-
-          if (error) {
-            console.error('Error updating management score:', error);
-          }
-        }
-
-        // 4. Save text responses (관리처 서술형 + 종합 의견)
-        const allTextResponses = {
-          ...data.managementTextAnswers,
-          ...data.opinionAnswers
-        };
-
-        for (const [questionNumber, response] of Object.entries(allTextResponses)) {
-          if (response && response.trim()) {
-            const { data: questionData, error: questionError } = await supabase
-              .from('survey_questions')
-              .select('question_text')
-              .eq('question_number', parseInt(questionNumber))
-              .maybeSingle();
-
-            if (questionError) {
-              console.error('Error fetching question text:', questionError);
-              continue;
-            }
-
-            if (!questionData || !questionData.question_text) {
-              console.error(`Question ${questionNumber} not found in survey_questions`);
-              continue;
-            }
-
-            const { error } = await supabase
-              .from('text_responses')
-              .insert({
-                auth_user_id: user.auth_user_id,
-                question_number: parseInt(questionNumber),
-                question_text: questionData.question_text,
-                response_text: response.trim(),
-                respondent_department: data.department
-              });
-
-            if (error) {
-              console.error('Error saving text response:', error);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Background score update error:', error);
-      }
-    })(); // 즉시 실행하지만 await하지 않음
 
     return NextResponse.json({
       success: true,
