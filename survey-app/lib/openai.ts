@@ -38,17 +38,9 @@ ${data.byType.map(type => {
   return `- ${type.evaluationType}: 본인평가 ${type.ownScore.toFixed(2)}점 → 최종 ${type.finalScore.toFixed(2)}점${diffText} | **${type.rank}위**`;
 }).join('\n')}
 
-[본인 평가 문항별 점수 - 상위 5개]
+[본인 평가 문항별 점수 - 전체 문항 (점수 높은 순)]
 ${data.questions
   .sort((a, b) => b.avgScore - a.avgScore)
-  .slice(0, 5)
-  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위)`)
-  .join('\n')}
-
-[본인 평가 문항별 점수 - 하위 5개]
-${data.questions
-  .sort((a, b) => a.avgScore - b.avgScore)
-  .slice(0, 5)
   .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위)`)
   .join('\n')}
 
@@ -145,19 +137,10 @@ ${Object.entries(data.textKeywords)
 [평가유형별 평균 점수]
 ${data.byType.map(type => `- ${type.evaluationType}: ${type.average.toFixed(2)}점`).join('\n')}
 
-[세부 문항별 점수 - 상위 5개]
+[세부 문항별 점수 - 전체 문항 (점수 높은 순)]
 ${data.questionScores
   .filter(q => q.avgScore > 0)
   .sort((a, b) => b.avgScore - a.avgScore)
-  .slice(0, 5)
-  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점`)
-  .join('\n')}
-
-[세부 문항별 점수 - 하위 5개]
-${data.questionScores
-  .filter(q => q.avgScore > 0)
-  .sort((a, b) => a.avgScore - b.avgScore)
-  .slice(0, 5)
   .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점`)
   .join('\n')}
 ${keywordSection}
