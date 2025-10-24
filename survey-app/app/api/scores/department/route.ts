@@ -39,28 +39,28 @@ export async function GET(request: NextRequest) {
           ownScore: deptData.org_culture_avg || 0,
           otherScore: 0, // 타부서 평가 없음
           finalScore: deptData.org_culture_avg || 0,
-          rank: (deptData.org_culture_count || 0) > 0 ? (deptRanking?.org_culture_rank || 0) : 0
+          rank: (deptData.org_culture_avg || 0) > 0 ? (deptRanking?.org_culture_rank || 0) : 0
         },
         {
           evaluationType: '업무충실',
           ownScore: deptData.work_integrity_own_avg || 0,
           otherScore: deptData.work_integrity_other_avg || 0,
           finalScore: deptData.work_integrity_avg || 0,
-          rank: (deptData.work_integrity_count || 0) > 0 ? (deptRanking?.work_integrity_rank || 0) : 0
+          rank: (deptData.work_integrity_avg || 0) > 0 ? (deptRanking?.work_integrity_rank || 0) : 0
         },
         {
           evaluationType: '업무협조',
           ownScore: deptData.work_cooperation_own_avg || 0,
           otherScore: deptData.work_cooperation_other_avg || 0,
           finalScore: deptData.work_cooperation_avg || 0,
-          rank: (deptData.work_cooperation_count || 0) > 0 ? (deptRanking?.work_cooperation_rank || 0) : 0
+          rank: (deptData.work_cooperation_avg || 0) > 0 ? (deptRanking?.work_cooperation_rank || 0) : 0
         },
         {
           evaluationType: '업무혁신',
           ownScore: deptData.work_innovation_own_avg || 0,
           otherScore: deptData.work_innovation_other_avg || 0,
           finalScore: deptData.work_innovation_avg || 0,
-          rank: (deptData.work_innovation_count || 0) > 0 ? (deptRanking?.work_innovation_rank || 0) : 0
+          rank: (deptData.work_innovation_avg || 0) > 0 ? (deptRanking?.work_innovation_rank || 0) : 0
         }
       ];
 
