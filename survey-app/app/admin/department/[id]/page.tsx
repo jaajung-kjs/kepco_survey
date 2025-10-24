@@ -97,7 +97,7 @@ export default function DepartmentAnalysisPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {departmentData.scores?.map((score: any) => {
-                  const diff = score.ownScore - score.otherScore;
+                  const diff = score.finalScore - score.ownScore;
                   return (
                     <tr key={score.evaluationType}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
