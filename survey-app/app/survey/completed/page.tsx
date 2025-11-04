@@ -36,7 +36,7 @@ export default function SurveyCompletedPage() {
 
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
           <p className="text-sm text-blue-800">
-            설문 결과는 한국전력공사의 조직 개선 및 발전을 위해 활용될 예정입니다.
+            설문 결과는 한국전력공사 강원본부 전력관리처의 조직 개선 및 발전을 위해 활용될 예정입니다.
           </p>
         </div>
 

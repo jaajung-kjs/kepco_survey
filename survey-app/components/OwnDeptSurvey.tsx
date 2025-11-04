@@ -86,6 +86,11 @@ export default function OwnDeptSurvey({ questions, onNext, onBack, initialAnswer
             </button>
           </div>
         </div>
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-3 mb-3">
+          <p className="text-sm text-blue-700">
+            <span className="font-semibold">※ 안내:</span> "우리부서"는 관리처 내의 본인 소속부서를 말하며, "우리지사"는 전력지사를 의미합니다. (전력지사 각 팀이 아님)
+          </p>
+        </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div
             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
