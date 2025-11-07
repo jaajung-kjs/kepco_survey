@@ -29,47 +29,41 @@ interface DepartmentAnalysisData {
 
 export async function generateDepartmentAnalysis(data: DepartmentAnalysisData): Promise<string> {
   const prompt = `
-다음은 ${data.department}의 조직 평가 결과입니다. 이 데이터를 분석하여 종합 평가를 작성해주세요.
+다음은 ${data.department}의 조직 평가 결과입니다. 아래 데이터를 기반으로 종합 분석 보고서를 작성해주세요.
 
-[평가유형별 최종 점수 및 순위]
+[평가유형별 상세 점수]
 ${data.byType.map(type => {
-  const diff = type.finalScore - type.ownScore;
-  const diffText = type.otherScore > 0 ? ` (타부서 평가 반영 ${diff > 0 ? '+' : ''}${diff.toFixed(2)})` : '';
-  return `- ${type.evaluationType}: 본인평가 ${type.ownScore.toFixed(2)}점 → 최종 ${type.finalScore.toFixed(2)}점${diffText} | **${type.rank}위**`;
+  return `- ${type.evaluationType}: ${type.finalScore.toFixed(2)}점 (${type.rank}위/10위)`;
 }).join('\n')}
 
-[본인 평가 문항별 점수 - 전체 문항 (점수 높은 순)]
+[본인 부서 문항별 상세 점수 - 점수 높은 순]
 ${data.questions
   .sort((a, b) => b.avgScore - a.avgScore)
-  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위)`)
+  .map(q => `- ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위/10위)`)
   .join('\n')}
 
 ${data.otherQuestions && data.otherQuestions.length > 0 ? `
-[타부서 평가 문항별 점수 (간부에 의한 평가)]
+[타부서가 평가한 문항별 상세 점수 - 점수 높은 순]
 ${data.otherQuestions
-  .map(q => `- ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위)`)
+  .sort((a, b) => b.avgScore - a.avgScore)
+  .map(q => `- ${q.questionText}: ${q.avgScore.toFixed(2)}점 (${q.rank}위/10위)`)
   .join('\n')}
 ` : ''}
 
-다음 항목에 대해 분석해주세요:
-1. **강점 분야**:
-   - 순위가 높은 평가유형과 문항 분석
-   - 전체 평균 대비 우수한 영역
+**보고서 작성 형식:**
+다음 5개 섹션으로 구성된 보고서를 작성해주세요.
 
-2. **개선 필요 분야**:
-   - 순위가 낮은 평가유형과 문항 분석
-   - 전체 평균에 미치지 못하는 영역과 원인
+1. 전반적인 평가 결과 요약
+2. 두드러진 강점 영역과 그 의미
+3. 개선이 필요한 영역과 배경
+4. 데이터에서 발견되는 주요 패턴과 시사점
+5. 결론
 
-3. **본인평가 vs 타부서평가 차이**:
-   - 평가유형별 점수 차이 분석
-   - 타부서 평가에서 높거나 낮은 영역의 의미
-
-4. **구체적 개선 제안**:
-   - 순위와 점수를 기반으로 한 우선순위별 실행 방안 3가지
-   - 각 제안에 대한 기대 효과
-
-전문적이고 객관적인 톤으로 작성하되, 구체적인 데이터(점수, 순위, 전체 평균 대비 차이)를 근거로 제시해주세요.
-마크다운 형식으로 작성해주세요.
+**작성 지침:**
+- 각 섹션을 ## 제목으로 구분하여 작성하세요
+- 점수와 순위 데이터를 구체적으로 인용하며 분석하세요
+- 전문적이고 객관적인 톤을 유지하세요
+- 마크다운 형식으로 가독성 있게 작성하세요
 `;
 
   try {
@@ -132,36 +126,34 @@ ${Object.entries(data.textKeywords)
 ` : '';
 
   const prompt = `
-다음은 관리처 전반에 대한 조직 평가 결과입니다. 이 데이터를 분석하여 종합 평가를 작성해주세요.
+다음은 관리처 전반에 대한 조직 평가 결과입니다. 아래 데이터를 기반으로 종합 분석 보고서를 작성해주세요.
 
 [평가유형별 평균 점수]
 ${data.byType.map(type => `- ${type.evaluationType}: ${type.average.toFixed(2)}점`).join('\n')}
 
-[세부 문항별 점수 - 전체 문항 (점수 높은 순)]
+[세부 문항별 점수 - 점수 높은 순]
 ${data.questionScores
   .filter(q => q.avgScore > 0)
   .sort((a, b) => b.avgScore - a.avgScore)
-  .map(q => `- Q${q.questionNumber}. ${q.questionText}: ${q.avgScore.toFixed(2)}점`)
+  .map(q => `- ${q.questionText}: ${q.avgScore.toFixed(2)}점`)
   .join('\n')}
 ${keywordSection}
 
-다음 항목에 대해 분석해주세요:
-1. **관리처 강점**:
-   - 높은 평가를 받은 평가유형과 문항
-   - 서술형 응답 키워드에서 나타난 긍정적 요소
+**보고서 작성 형식:**
+다음 5개 섹션으로 구성된 보고서를 작성해주세요.
 
-2. **개선 영역**:
-   - 낮은 점수를 받은 평가유형과 문항
-   - 서술형 응답 키워드에서 나타난 문제점과 원인
-   - 직원들이 제시한 개선 필요 사항
+1. 전반적인 평가 결과 요약
+2. 두드러진 강점 영역과 그 의미
+3. 개선이 필요한 영역과 배경
+4. 데이터에서 발견되는 주요 패턴과 시사점 (서술형 키워드 분석 포함)
+5. 결론
 
-3. **우선순위별 개선 제안**:
-   - 점수 데이터와 키워드 분석을 종합하여 즉시 실행 가능한 제안 3가지
-   - 각 제안의 실행 방법과 기대 효과
-   - 직원들의 실제 의견(키워드)을 반영한 실질적 방안
-
-전문적이고 객관적인 톤으로 작성하되, 구체적인 데이터(점수)와 직원들의 실제 의견(키워드)을 근거로 제시해주세요.
-마크다운 형식으로 작성해주세요.
+**작성 지침:**
+- 각 섹션을 ## 제목으로 구분하여 작성하세요
+- 점수 데이터와 키워드 데이터를 구체적으로 인용하며 분석하세요
+- 서술형 응답 키워드의 빈도와 패턴을 깊이있게 해석하세요
+- 전문적이고 객관적인 톤을 유지하세요
+- 마크다운 형식으로 가독성 있게 작성하세요
 `;
 
   try {
