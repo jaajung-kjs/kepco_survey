@@ -118,11 +118,18 @@ export async function GET(request: NextRequest) {
       // 전체 부서 점수 조회
       const { data: allDepts, error } = await supabase
         .from('department_scores')
-        .select('department, org_culture_avg, work_integrity_avg, work_cooperation_avg, work_innovation_avg, overall_avg');
+        .select('department, org_culture_avg, work_integrity_avg, work_cooperation_avg, work_innovation_avg, overall_avg, other_q1_avg, other_q2_avg, other_q3_avg, other_q4_avg, other_q5_avg');
 
       if (error) throw error;
 
-      const result = allDepts?.map(dept => ({
+      // Q21-Q25 문항 제목 조회
+      const { data: otherQuestions } = await supabase
+        .from('survey_questions')
+        .select('question_number, question_text')
+        .in('question_number', [21, 22, 23, 24, 25])
+        .order('question_number');
+
+      const departments = allDepts?.map(dept => ({
         department: dept.department,
         scores: [
           { evaluationType: '조직문화', finalScore: dept.org_culture_avg || 0 },
@@ -130,10 +137,20 @@ export async function GET(request: NextRequest) {
           { evaluationType: '업무협조', finalScore: dept.work_cooperation_avg || 0 },
           { evaluationType: '업무혁신', finalScore: dept.work_innovation_avg || 0 }
         ],
-        finalAverage: dept.overall_avg || 0
+        finalAverage: dept.overall_avg || 0,
+        otherScores: [
+          dept.other_q1_avg || 0,
+          dept.other_q2_avg || 0,
+          dept.other_q3_avg || 0,
+          dept.other_q4_avg || 0,
+          dept.other_q5_avg || 0
+        ]
       })) || [];
 
-      return NextResponse.json(result);
+      return NextResponse.json({
+        departments,
+        otherQuestions: otherQuestions || []
+      });
     }
   } catch (error) {
     console.error('부서 점수 조회 오류:', error);

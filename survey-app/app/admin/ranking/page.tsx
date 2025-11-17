@@ -10,6 +10,7 @@ export default function RankingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [allScores, setAllScores] = useState<any[]>([]);
+  const [otherQuestions, setOtherQuestions] = useState<any[]>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -34,7 +35,8 @@ export default function RankingPage() {
       const res = await fetch('/api/scores/department');
       const data = await res.json();
 
-      setAllScores(data);
+      setAllScores(data.departments || data); // 하위 호환성
+      setOtherQuestions(data.otherQuestions || []);
       setLoading(false);
     }
 
@@ -60,6 +62,15 @@ export default function RankingPage() {
           score: typeScore?.finalScore || 0
         };
       })
+      .sort((a, b) => b.score - a.score);
+  };
+
+  const getOtherQuestionRanking = (qIndex: number) => {
+    return [...allScores]
+      .map(dept => ({
+        department: dept.department,
+        score: dept.otherScores?.[qIndex] || 0
+      }))
       .sort((a, b) => b.score - a.score);
   };
 
@@ -131,6 +142,31 @@ export default function RankingPage() {
             );
           })}
         </div>
+
+        {/* 타부서 평가 문항별 순위 */}
+        {otherQuestions.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">타부서 평가 문항별 순위 (Q21-Q25)</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {otherQuestions.map((question, index) => {
+                const ranking = getOtherQuestionRanking(index);
+                const chartData = ranking.map((item, rank) => ({
+                  department: item.department,
+                  score: item.score,
+                  rank: rank + 1
+                }));
+                return (
+                  <div key={question.question_number} className="bg-white rounded-lg shadow p-6">
+                    <RankingBarChart
+                      data={chartData}
+                      title={`Q${question.question_number}. ${question.question_text}`}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
