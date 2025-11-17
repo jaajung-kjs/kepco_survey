@@ -52,7 +52,7 @@ export default function RankingBarChart({ data, title }: RankingBarChartProps) {
             <LabelList
               dataKey="score"
               position="right"
-              formatter={(value: number) => value.toFixed(2)}
+              formatter={(value: any) => typeof value === 'number' ? value.toFixed(2) : value}
               style={{ fontSize: '12px', fontWeight: 'bold' }}
             />
           </Bar>
