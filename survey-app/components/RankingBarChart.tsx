@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell, LabelList } from 'recharts';
 
 interface RankingBarChartProps {
   data: {
@@ -28,9 +28,16 @@ export default function RankingBarChart({ data, title }: RankingBarChartProps) {
   // 순위별로 정렬
   const sortedData = [...data].sort((a, b) => a.rank - b.rank);
 
+  // 평균 점수 계산
+  const averageScore = data.length > 0
+    ? (data.reduce((sum, item) => sum + item.score, 0) / data.length).toFixed(2)
+    : '0.00';
+
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      <h3 className="text-lg font-semibold mb-4">
+        {title} <span className="text-gray-600 font-normal">(평균: {averageScore}점)</span>
+      </h3>
       <ResponsiveContainer width="100%" height={400}>
         <BarChart data={sortedData} layout="vertical">
           <CartesianGrid strokeDasharray="3 3" />
@@ -42,6 +49,12 @@ export default function RankingBarChart({ data, title }: RankingBarChartProps) {
             {sortedData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
+            <LabelList
+              dataKey="score"
+              position="right"
+              formatter={(value: number) => value.toFixed(2)}
+              style={{ fontSize: '12px', fontWeight: 'bold' }}
+            />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
